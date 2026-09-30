@@ -41,7 +41,7 @@ export default async function Home() {
   ])
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
+    <main>
       <Workspace
         todos={todos}
         people={people}

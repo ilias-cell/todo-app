@@ -52,4 +52,16 @@ body {
   color: var(--text);
   font-size: 15px;
   line-height: 1.55;
+  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: none; /* не «оттягивается» вся страница */
+}
+
+button, a, [role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* убирает 300ms задержку двойного тапа */
+}
+
+/* iOS не должен зумить при фокусе на поле */
+@media (max-width: 640px) {
+  input, textarea, select { font-size: 16px; }
 }
