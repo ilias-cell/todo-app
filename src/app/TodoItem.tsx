@@ -14,6 +14,7 @@ export default function TodoItem({
   deleteTodo: (id: number) => Promise<void>
 }) {
   const [isPending, startTransition] = useTransition()
+  const isDone = todo.status === 'DONE'
 
   return (
     <li
@@ -26,14 +27,14 @@ export default function TodoItem({
       {/* Круглый ghost-checkbox */}
       <button
         onClick={() => startTransition(() => toggleTodo(todo.id))}
-        aria-label={todo.done ? 'Снять отметку' : 'Отметить выполненным'}
+        aria-label={isDone ? 'Снять отметку' : 'Отметить выполненным'}
         className="relative flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full transition-all duration-140 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--accent]"
         style={{
-          border:     todo.done ? 'none'               : '1.5px solid var(--border)',
-          background: todo.done ? 'var(--text-ghost)'  : 'transparent',
+          border:     isDone ? 'none'               : '1.5px solid var(--border)',
+          background: isDone ? 'var(--text-ghost)'  : 'transparent',
         }}
       >
-        {todo.done && (
+        {isDone && (
           <svg width="10" height="7" viewBox="0 0 10 7" fill="none" aria-hidden="true">
             <path
               d="M1 3.5L3.8 6L9 1"
@@ -49,8 +50,8 @@ export default function TodoItem({
       <span
         className="flex-1 text-[15px]"
         style={{
-          color:          todo.done ? 'var(--text-ghost)' : 'var(--text)',
-          textDecoration: todo.done ? 'line-through'      : 'none',
+          color:          isDone ? 'var(--text-ghost)' : 'var(--text)',
+          textDecoration: isDone ? 'line-through'      : 'none',
         }}
       >
         {todo.text}

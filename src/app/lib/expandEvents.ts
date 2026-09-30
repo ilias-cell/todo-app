@@ -42,7 +42,7 @@ export function expandEvents(
   for (const ev of events) {
     if (!ev.recurrence) {
       // Не повторяющееся — добавляем как есть, если попадает в диапазон
-      const d = ev.date instanceof Date ? ev.date : new Date(ev.date as unknown as string)
+      const d = (ev.date as any) instanceof Date ? (ev.date as any as Date) : new Date(ev.date as unknown as string)
       if (d >= rangeStart && d <= rangeEnd) {
         result.push(ev)
       }
@@ -58,7 +58,7 @@ export function expandEvents(
       : null
     const end = recEnd && recEnd < rangeEnd ? recEnd : rangeEnd
 
-    const origin = ev.date instanceof Date ? ev.date : new Date(ev.date as unknown as string)
+    const origin = (ev.date as any) instanceof Date ? (ev.date as any as Date) : new Date(ev.date as unknown as string)
     let cursor = new Date(origin)
 
     // Пропускаем даты до начала диапазона
@@ -85,10 +85,10 @@ export function expandEvents(
   }
 
   return result.sort((a, b) => {
-    const da = (a.date instanceof Date ? a.date : new Date(a.date as unknown as string))
+    const da = ((a.date as any) instanceof Date ? (a.date as any as Date) : new Date(a.date as unknown as string))
       .toISOString()
       .slice(0, 10)
-    const db = (b.date instanceof Date ? b.date : new Date(b.date as unknown as string))
+    const db = ((b.date as any) instanceof Date ? (b.date as any as Date) : new Date(b.date as unknown as string))
       .toISOString()
       .slice(0, 10)
     if (da !== db) return da.localeCompare(db)

@@ -129,9 +129,7 @@ export default function Calendar({
   function sortedEvents(iso: string) {
     return [...events]
       .filter((e) => {
-        const d = e.date instanceof Date
-          ? e.date.toISOString().slice(0, 10)
-          : String(e.date).slice(0, 10)
+        const d = (e.date as any) instanceof Date ? ((e.date as any) as Date).toISOString().slice(0, 10) : String(e.date).slice(0, 10);
         return d === iso
       })
       .filter((e) => projectFilter === null || e.projectId === projectFilter)
@@ -688,11 +686,11 @@ function EventPanel({
 }) {
   const ev = state.mode === 'edit' ? state.event : null
 
-  const evDate = ev?.date instanceof Date
-    ? ev.date.toISOString().slice(0, 10)
-    : ev?.date
-      ? String(ev.date).slice(0, 10)
-      : null
+  const evDate = ev?.date
+    ? (ev.date as any) instanceof Date
+      ? (ev.date as any as Date).toISOString().slice(0, 10)
+      : String(ev.date).slice(0, 10)
+    : null
 
   const [title,         setTitle]         = useState(ev?.title ?? '')
   const [kind,          setKind]          = useState<EventKind>(ev?.kind ?? 'MEETING')
@@ -874,7 +872,7 @@ function EventPanel({
                 >
                   Частота
                 </span>
-                <select value={recurrence} onChange={(e) => setRecurrence(e.target.value)}
+                <select value={recurrence} onChange={(e) => setRecurrence(e.target.value as typeof recurrence)}
                         className={inputCls} style={inputStyle}>
                   {Object.entries(RECURRENCE_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
@@ -1027,8 +1025,8 @@ function MonthView({
 
   function eventsForDay(iso: string) {
     return events.filter((e) => {
-      const d = e.date instanceof Date
-        ? e.date.toISOString().slice(0, 10)
+      const d = (e.date as any) instanceof Date
+        ? (e.date as any as Date).toISOString().slice(0, 10)
         : String(e.date).slice(0, 10)
       return d === iso
     })
@@ -1143,8 +1141,8 @@ function DayView({
 
   const dayEvents = events
     .filter((e) => {
-      const d = e.date instanceof Date
-        ? e.date.toISOString().slice(0, 10)
+      const d = (e.date as any) instanceof Date
+        ? (e.date as any as Date).toISOString().slice(0, 10)
         : String(e.date).slice(0, 10)
       return d === iso
     })

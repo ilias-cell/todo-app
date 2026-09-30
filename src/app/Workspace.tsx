@@ -71,8 +71,8 @@ export default function Workspace({
   const today = new Date().toISOString().slice(0, 10)
   const todayEvents = expandedEvents.filter((e) => {
     const d =
-      e.date instanceof Date
-        ? e.date.toISOString().slice(0, 10)
+      (e.date as any) instanceof Date
+        ? (e.date as any as Date).toISOString().slice(0, 10)
         : String(e.date).slice(0, 10)
     return d === today
   })

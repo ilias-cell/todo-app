@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from 'react'
 import type { Person, Project } from '@prisma/client'
-import { createEvent } from './actions'
+import { addEvent } from './actions'
 
 const RECURRENCE_LABELS: Record<string, string> = {
   DAILY:    'Каждый день',
@@ -39,15 +39,15 @@ export default function EventForm({
     if (!title.trim() || !date) return
 
     startTransition(async () => {
-      await createEvent({
+      await addEvent({
         title:         title.trim(),
         date,
         startTime:     startTime  || null,
         endTime:       endTime    || null,
-        kind,
+        kind: kind as 'MEETING' | 'DEADLINE' | 'INFO',
         personId:      personId   ? Number(personId)  : null,
         projectId:     projectId  ? Number(projectId) : null,
-        recurrence:    recurring  ? recurrence        : null,
+        recurrence:    recurring  ? (recurrence as 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY')        : null,
         recurrenceEnd: recurring && recurrenceEnd ? recurrenceEnd : null,
       })
       onClose()

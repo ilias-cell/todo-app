@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import type { Todo } from '@prisma/client'
 import TodoItem from './TodoItem'
-import { toggleTodo, deleteTodo } from './actions'
+import { setStatus, deleteTodo } from './actions'
 
 type Filter = 'all' | 'active' | 'completed'
 
@@ -12,16 +12,23 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
   const [filter, setFilter] = useState<Filter>('all')
 
   const filtered = todos.filter((todo) => {
-    if (filter === 'active') return !todo.done
-    if (filter === 'completed') return todo.done
+    if (filter === 'active') return todo.status !== 'DONE'
+    if (filter === 'completed') return todo.status === 'DONE'
     return true
   })
 
   const total = todos.length
-  const completed = todos.filter((t) => t.done).length
+  const completed = todos.filter((t) => t.status === 'DONE').length
 
   const tabClass = (f: Filter) =>
     `text-xs ${filter === f ? 'font-medium text-neutral-900' : 'text-neutral-400'}`
+
+  const toggleTodo = async (id: number) => {
+    const todo = todos.find((t) => t.id === id)
+    if (!todo) return
+    const newStatus = todo.status === 'DONE' ? 'INBOX' : 'DONE'
+    await setStatus(id, newStatus)
+  }
 
   return (
     <>
