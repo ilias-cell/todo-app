@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Todo" ADD COLUMN     "nextAction" TEXT,
+ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Следующее действие | GTD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 p-6">
+  <div class="mx-auto max-w-3xl bg-white rounded-xl shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-neutral-800 mb-6">Карточка задачи</h1>
+    
+    <!-- Поля задачи -->
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-neutral-500 mb-1">НАЗВАНИЕ</label>
+        <input 
+          type="text" 
+          value="Договор с поставщиком" 
+          class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 outline-none">
+      </div>
+
+      <!-- Поле "Следующее действие" -->
+      <div>
+        <label class="block text-sm font-medium text-neutral-500 mb-1">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</label>
+        <div class="relative">
+          <input 
+            type="text" 
+            placeholder="Что конкретно сделать?" 
+            value="Позвонить Ивану и уточнить условия" 
+            class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 outline-none">
+          <span class="absolute right-3 top-2 text-yellow-500">⚡</span>
+        </div>
+        <p class="text-xs text-neutral-400 mt-1">Без этого задача не может быть «В работе»</p>
+      </div>
+
+      <!-- Остальные поля -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-500 mb-1">СТАТУС</label>
+          <select class="w-full border border-neutral-300 rounded-lg px-3 py-2">
+            <option>В работе</option>
+            <option>Ожидание</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-neutral-500 mb-1">КОНТЕКСТ</label>
+          <select class="w-full border border-neutral-300 rounded-lg px-3 py-2">
+            <option>@телефон</option>
+            <option>@компьютер</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="flex justify-end gap-2 mt-8">
+      <button class="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-100">Отмена</button>
+      <button class="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-700">Сохранить</button>
+    </div>
+  </div>
+</body>
+</html>

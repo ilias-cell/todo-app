@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GTD — Календарь (быстрые улучшения)</title>
+<style>
+  :root {
+    /* Neutral ramp */
+    --n950: #0f0f0f;
+    --n900: #171717;
+    --n800: #262626;
+    --n700: #404040;
+    --n600: #525252;
+    --n500: #737373;
+    --n400: #a3a3a3;
+    --n300: #d4d4d4;
+    --n200: #e5e5e5;
+    --n100: #f5f5f5;
+    --n50:  #fafafa;
+
+    /* Accent ramps */
+    --blue-700: #1d4ed8;
+    --blue-500: #3b82f6;
+    --blue-200: #bfdbfe;
+    --blue-100: #dbeafe;
+
+    --amber-600: #d97706;
+    --amber-200: #fde68a;
+    --amber-100: #fef3c7;
+
+    --purple-700: #7e22ce;
+    --purple-300: #d8b4fe;
+    --purple-100: #f3e8ff;
+
+    --green-700: #15803d;
+    --green-200: #bbf7d0;
+    --green-100: #dcfce7;
+
+    --red-600:  #dc2626;
+    --red-100:  #fee2e2;
+
+    /* Semantic roles */
+    --surface:        #ffffff;
+    --surface-raised: var(--n50);
+    --border:         var(--n200);
+    --border-strong:  var(--n300);
+    --text-body:      var(--n900);
+    --text-muted:     var(--n500);
+    --text-faint:     var(--n400);
+
+    --radius-sm: .375rem;
+    --radius-md: .625rem;
+    --radius-lg: .875rem;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    background: var(--surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ── */
+  .wrap { max-width: 42rem; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .75rem; margin-bottom: 2rem;
+  }
+  .tab {
+    font-size: .875rem; color: var(--text-faint);
+    background: none; border: none; cursor: pointer; padding: 0;
+  }
+  .tab.active { color: var(--text-body); font-weight: 500; }
+
+  /* ── Page header ── */
+  .page-title { font-size: 1.5rem; font-weight: 600; }
+  .page-sub   { font-size: .875rem; color: var(--text-faint); margin-top: .25rem; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    font-size: .75rem; color: var(--text-muted); margin-top: .875rem;
+  }
+  .legend span { display: flex; align-items: center; gap: .375rem; }
+  .dot { width: .6rem; height: .6rem; border-radius: 999px; display: inline-block; flex-shrink: 0; }
+
+  /* ── Navigation bar ── */
+  .nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 1.5rem; gap: .5rem;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .8125rem; color: var(--text-muted);
+    background: none; border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: .4rem .75rem;
+    cursor: pointer; transition: background 120ms, color 120ms;
+  }
+  .nav-btn:hover { background: var(--n100); color: var(--text-body); }
+  .nav-range {
+    font-size: .875rem; font-weight: 500; color: var(--text-body);
+    text-align: center; flex: 1;
+  }
+  .today-btn {
+    font-size: .75rem; color: var(--text-muted); background: none;
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: .35rem .65rem; cursor: pointer;
+  }
+  .today-btn:hover { background: var(--n100); color: var(--text-body); }
+
+  /* ── Add event button ── */
+  .add-btn {
+    margin-top: 1.25rem;
+    font-size: .875rem; color: var(--n600);
+    background: none; border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: .45rem 1rem;
+    cursor: pointer; transition: background 120ms;
+  }
+  .add-btn:hover { background: var(--n100); }
+
+  /* ── Day block ── */
+  .day          { margin-top: 1.75rem; }
+  .day-head     { display: flex; align-items: baseline; justify-content: space-between; }
+  .day-label    { font-size: .6875rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
+  .day-label.today { color: var(--text-body); }
+  .day-count    { font-size: .6875rem; color: var(--text-faint); }
+  .events       { margin-top: .5rem; border-top: 1px solid var(--n100); }
+  .empty        { font-size: .875rem; color: var(--n300); padding: .75rem 0; }
+
+  /* ── Event row ── */
+  .event        { border-bottom: 1px solid var(--n100); }
+  .event-main   {
+    display: flex; align-items: flex-start; gap: .875rem;
+    padding: .75rem 0; cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background 120ms;
+  }
+  .event-main:hover { background: var(--n50); }
+  .event-main:hover .ev-actions { opacity: 1; }
+
+  .time {
+    width: 5.5rem; flex-shrink: 0;
+    font-size: .8125rem; font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  .time.allday { color: var(--text-faint); }
+
+  .rail { width: 3px; flex-shrink: 0; align-self: stretch; border-radius: 2px; min-height: 1.5rem; }
+
+  .ev-body      { flex: 1; min-width: 0; }
+  .ev-title     { font-size: .9375rem; color: var(--text-body); }
+  .ev-meta      { font-size: .75rem; color: var(--text-faint); margin-top: .125rem; }
+  .person-link  {
+    color: var(--text-muted); text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 2px; cursor: pointer;
+    background: none; border: none; font: inherit; padding: 0;
+  }
+
+  /* Action buttons — appear on hover */
+  .ev-actions {
+    display: flex; gap: .25rem; opacity: 0; transition: opacity 120ms;
+    flex-shrink: 0;
+  }
+  .ev-act {
+    font-size: .6875rem; color: var(--text-faint);
+    background: none; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: .2rem .5rem;
+    cursor: pointer; transition: background 120ms, color 120ms;
+  }
+  .ev-act:hover          { background: var(--n100); color: var(--text-body); }
+  .ev-act.danger:hover   { background: var(--red-100); color: var(--red-600); border-color: var(--red-100); }
+
+  /* @agenda toggle */
+  .agenda-toggle {
+    margin-top: .5rem; display: inline-flex; align-items: center; gap: .375rem;
+    font-size: .6875rem; border-radius: 999px; padding: .15rem .6rem;
+    background: var(--purple-100); color: var(--purple-700);
+    border: none; cursor: pointer;
+  }
+  .chev { display: inline-block; transition: transform .15s; }
+  .chev.open { transform: none; }
+  .chev.closed { transform: rotate(-90deg); }
+
+  /* Inline agenda */
+  .agenda-inline {
+    margin: .5rem 0 .25rem 6.375rem;
+    border-left: 2px solid var(--purple-100);
+    padding: .25rem 0 .25rem .75rem;
+  }
+  .agenda-inline ul { list-style: none; }
+  .agenda-inline li {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .8125rem; color: var(--n700); padding: .2rem 0;
+  }
+  .agenda-inline li input[type=checkbox] { width: .875rem; height: .875rem; }
+  .agenda-mini-input {
+    margin-top: .375rem; width: 100%;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: .3rem .5rem; font-size: .75rem; outline: none;
+  }
+  .agenda-mini-input:focus { border-color: var(--n500); }
+  .open-full {
+    margin-top: .375rem; font-size: .6875rem; color: var(--text-faint);
+    background: none; border: none; cursor: pointer; text-decoration: underline;
+  }
+
+  /* ── Spawn-task button (NEW) ── */
+  .spawn-task {
+    display: inline-flex; align-items: center; gap: .375rem;
+    margin-top: .5rem;
+    font-size: .6875rem; border-radius: 999px; padding: .15rem .6rem;
+    background: var(--green-100); color: var(--green-700);
+    border: none; cursor: pointer; transition: background 120ms;
+  }
+  .spawn-task:hover { background: var(--green-200); }
+
+  /* ── Edit event panel (slide-over) ── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20;
+    background: rgba(0,0,0,.18);
+  }
+  .panel {
+    position: fixed; top: 0; right: 0; z-index: 30;
+    height: 100%; width: 22rem; max-width: 90vw;
+    background: var(--surface); padding: 1.5rem;
+    box-shadow: -6px 0 24px rgba(0,0,0,.07);
+    display: flex; flex-direction: column; gap: .875rem;
+    overflow-y: auto;
+  }
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-head h2 { font-size: 1.0625rem; font-weight: 600; }
+  .panel-close {
+    font-size: 1.125rem; color: var(--text-faint);
+    background: none; border: none; cursor: pointer;
+  }
+  .panel-close:hover { color: var(--text-body); }
+
+  .field-group { display: flex; flex-direction: column; gap: .25rem; }
+  .field-label { font-size: .6875rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-faint); }
+  .field-input {
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: .5rem .75rem; font-size: .875rem; outline: none;
+    transition: border-color 120ms;
+  }
+  .field-input:focus { border-color: var(--n700); }
+  select.field-input { cursor: pointer; }
+
+  .field-row { display: flex; gap: .5rem; }
+  .field-row .field-group { flex: 1; }
+
+  .panel-actions { display: flex; gap: .5rem; margin-top: .25rem; }
+  .btn-primary {
+    flex: 1; background: var(--n900); color: #fff;
+    border: none; border-radius: var(--radius-md);
+    padding: .55rem 1rem; font-size: .875rem; cursor: pointer;
+    transition: background 120ms;
+  }
+  .btn-primary:hover { background: var(--n700); }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-ghost {
+    background: none; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: .55rem 1rem; font-size: .875rem; cursor: pointer;
+    transition: background 120ms;
+  }
+  .btn-ghost:hover { background: var(--n100); color: var(--text-body); }
+  .btn-danger {
+    background: none; color: var(--red-600);
+    border: 1px solid var(--red-100); border-radius: var(--radius-md);
+    padding: .55rem 1rem; font-size: .875rem; cursor: pointer;
+    transition: background 120ms;
+  }
+  .btn-danger:hover { background: var(--red-100); }
+
+  /* Spawn-task form inside panel */
+  .spawn-section {
+    border-top: 1px solid var(--border); padding-top: .875rem;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .spawn-title {
+    font-size: .6875rem; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--green-700);
+  }
+  .spawn-note {
+    font-size: .75rem; color: var(--text-faint);
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 50; background: var(--n900); color: #fff;
+    font-size: .8125rem; border-radius: var(--radius-md);
+    padding: .5rem 1.125rem; pointer-events: none;
+    opacity: 0; transition: opacity 200ms;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button class="tab">Утренний обзор</button>
+    <button class="tab">Все задачи</button>
+    <button class="tab">Обзор недели</button>
+    <button class="tab active">Календарь</button>
+  </nav>
+
+  <!-- Header -->
+  <h1 class="page-title">Календарь</h1>
+  <p class="page-sub">Только жёсткий ландшафт: встречи, дедлайны дня и важная информация.</p>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#60a5fa"></i> Встреча</span>
+    <span><i class="dot" style="background:#f59e0b"></i> Дедлайн дня</span>
+    <span><i class="dot" style="background:#c4b5fd"></i> Информация дня</span>
+  </div>
+
+  <!-- Улучшение 1: Навигация по датам -->
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="shiftWeek(-1)">← Назад</button>
+    <span class="nav-range" id="nav-range">3–9 марта 2025</span>
+    <button class="nav-btn" onclick="shiftWeek(1)">Вперёд →</button>
+    <button class="today-btn" onclick="goToday()">Сегодня</button>
+  </div>
+
+  <button class="add-btn" onclick="openPanel(null)">+ событие</button>
+
+  <!-- Days container -->
+  <div id="days-container"></div>
+
+</div><!-- /wrap -->
+
+<!-- Overlay + Edit/Add panel (Улучшение 2) -->
+<div class="overlay" id="overlay" style="display:none" onclick="closePanel()"></div>
+<aside class="panel" id="panel" style="display:none">
+  <div class="panel-head">
+    <h2 id="panel-title">Редактировать событие</h2>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Название</label>
+    <input class="field-input" id="f-title" type="text" placeholder="Название события" />
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Тип</label>
+    <select class="field-input" id="f-kind">
+      <option value="MEETING">Встреча</option>
+      <option value="DEADLINE">Дедлайн дня</option>
+      <option value="INFO">Информация дня</option>
+    </select>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label class="field-label">Дата</label>
+      <input class="field-input" id="f-date" type="date" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label class="field-label">Начало</label>
+      <input class="field-input" id="f-start" type="time" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Конец</label>
+      <input class="field-input" id="f-end" type="time" />
+    </div>
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">С кем</label>
+    <select class="field-input" id="f-person">
+      <option value="">— не указан —</option>
+      <option value="1">Иван</option>
+      <option value="2">Пётр</option>
+      <option value="3">Алина</option>
+    </select>
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Проект</label>
+    <select class="field-input" id="f-project">
+      <option value="">— не указан —</option>
+      <option value="1">Годовой план</option>
+      <option value="2">Редизайн сайта</option>
+    </select>
+  </div>
+
+  <div class="panel-actions">
+    <button class="btn-primary" id="panel-save" onclick="saveEvent()">Сохранить</button>
+    <button class="btn-ghost" onclick="closePanel()">Отмена</button>
+  </div>
+  <button class="btn-danger" id="panel-delete" onclick="deleteEvent()" style="display:none">
+    Удалить событие
+  </button>
+
+  <!-- Улучшение 3: Создать задачу из встречи -->
+  <div class="spawn-section" id="spawn-section" style="display:none">
+    <span class="spawn-title">↳ Создать задачу из встречи</span>
+    <p class="spawn-note">Задача наследует проект и участника из этого события.</p>
+    <div class="field-group">
+      <input class="field-input" id="f-task-title" type="text" placeholder="Следующее действие…" />
+    </div>
+    <button class="btn-ghost" onclick="spawnTask()" style="font-size:.8125rem">
+      + создать задачу
+    </button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const PEOPLE = { 1: 'Иван', 2: 'Пётр', 3: 'Алина' }
+const PROJECTS = { 1: 'Годовой план', 2: 'Редизайн сайта' }
+const RAIL = { MEETING: '#60a5fa', DEADLINE: '#f59e0b', INFO: '#c4b5fd' }
+const KIND_LABEL = { MEETING: 'Встреча', DEADLINE: 'Дедлайн', INFO: 'Информация дня' }
+
+const today = new Date()
+today.setHours(0,0,0,0)
+
+function toISO(d) {
+  return d.toISOString().slice(0,10)
+}
+function parseISO(s) {
+  const [y,m,d] = s.split('-').map(Number)
+  return new Date(y, m-1, d)
+}
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate()+n); return r
+}
+
+// Seed events
+let events = [
+  { id:1, title:'Стендап команды',       kind:'MEETING',  date: toISO(today),        startTime:'10:00', endTime:'10:30', personId:null, projectId:null },
+  { id:2, title:'Встреча по бюджету',    kind:'MEETING',  date: toISO(today),        startTime:'15:00', endTime:'16:00', personId:1,    projectId:1    },
+  { id:3, title:'Сдать квартальный отчёт',kind:'DEADLINE',date: toISO(today),        startTime:null,    endTime:null,    personId:null, projectId:null },
+  { id:4, title:'Прилетает клиент',      kind:'INFO',     date: toISO(addDays(today,1)), startTime:null, endTime:null,  personId:null, projectId:null },
+  { id:5, title:'Обед с Петром',         kind:'MEETING',  date: toISO(addDays(today,2)), startTime:'12:00',endTime:'13:00',personId:2, projectId:null },
+]
+let nextId = 6
+
+const agendaItems = {
+  1: [{ id:1, text:'Утвердить бюджет на Q2', done:false }, { id:2, text:'Обсудить найм дизайнера', done:false }, { id:3, text:'Статус по договору', done:false }],
+  2: [{ id:4, text:'Сроки по второму этапу', done:false }],
+  3: [],
+}
+
+// ─── Navigation state ────────────────────────────────────────────────────────
+let weekOffset = 0   // 0 = current week
+
+function weekStart(offset) {
+  const d = new Date(today)
+  d.setDate(d.getDate() - d.getDay() + 1 + offset * 7) // Monday
+  return d
+}
+
+function shiftWeek(dir) {
+  weekOffset += dir
+  render()
+}
+function goToday() {
+  weekOffset = 0
+  render()
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function render() {
+  const start = weekStart(weekOffset)
+  const end   = addDays(start, 6)
+
+  document.getElementById('nav-range').textContent =
+    `${fmtShort(start)} – ${fmtShort(end)}`
+
+  const container = document.getElementById('days-container')
+  container.innerHTML = ''
+
+  for (let i = 0; i < 7; i++) {
+    const d    = addDays(start, i)
+    const iso  = toISO(d)
+    const isToday = iso === toISO(today)
+    const dayEvs = events
+      .filter(e => e.date === iso)
+      .sort((a,b) => {
+        if (a.startTime && b.startTime) return a.startTime.localeCompare(b.startTime)
+        if (a.startTime) return -1
+        if (b.startTime) return 1
+        return 0
+      })
+
+    const section = document.createElement('div')
+    section.className = 'day'
+    section.innerHTML = `
+      <div class="day-head">
+        <span class="day-label${isToday?' today':''}">${fmtDay(d, isToday)}</span>
+        <span class="day-count">${dayEvs.length || ''}</span>
+      </div>
+      <div class="events" id="ev-${iso}"></div>`
+    container.appendChild(section)
+
+    const evContainer = section.querySelector(`#ev-${iso}`)
+    if (dayEvs.length === 0) {
+      evContainer.innerHTML = '<div class="empty">— свободный день —</div>'
+    } else {
+      dayEvs.forEach(ev => evContainer.appendChild(buildEventRow(ev)))
+    }
+  }
+}
+
+function buildEventRow(ev) {
+  const wrap = document.createElement('div')
+  wrap.className = 'event'
+
+  const timeStr = ev.startTime
+    ? (ev.endTime ? `${ev.startTime}–${ev.endTime}` : ev.startTime)
+    : 'весь день'
+  const timeClass = ev.startTime ? 'time' : 'time allday'
+
+  const personName = ev.personId ? PEOPLE[ev.personId] : null
+  const projName   = ev.projectId ? PROJECTS[ev.projectId] : null
+  const metaParts  = []
+  if (projName) metaParts.push(`⬡ ${projName}`)
+  if (ev.kind === 'INFO') metaParts.push('информация — действий не требует')
+
+  const agendaCount = ev.personId
+    ? (agendaItems[ev.personId] || []).filter(a => !a.done).length
+    : 0
+
+  wrap.innerHTML = `
+    <div class="event-main" onclick="handleEventClick(event, ${ev.id})">
+      <span class="${timeClass}">${timeStr}</span>
+      <span class="rail" style="background:${RAIL[ev.kind]}"></span>
+      <div class="ev-body">
+        <div class="ev-title">${ev.title}${personName
+          ? ` · <button class="person-link" onclick="event.stopPropagation()">${personName}</button>`
+          : ''}</div>
+        ${metaParts.length ? `<div class="ev-meta">${metaParts.join(' · ')}</div>` : ''}
+        ${ev.personId ? `
+          <button class="agenda-toggle" onclick="event.stopPropagation(); toggleAgenda(${ev.id})">
+            <span class="chev closed" id="chev-${ev.id}">▾</span>
+            @agenda: ${personName} · ${agendaCount} вопр.
+          </button>` : ''}
+      </div>
+      <div class="ev-actions">
+        <button class="ev-act" onclick="event.stopPropagation(); openPanel(${ev.id})">Изменить</button>
+        <button class="ev-act danger" onclick="event.stopPropagation(); confirmDelete(${ev.id})">Удалить</button>
+      </div>
+    </div>
+    <div id="inline-agenda-${ev.id}" style="display:none"></div>`
+
+  return wrap
+}
+
+function handleEventClick(e, id) {
+  // click on row background = open edit panel
+  if (e.target.closest('.ev-actions') || e.target.closest('.agenda-toggle') || e.target.closest('.person-link')) return
+  openPanel(id)
+}
+
+// ─── Inline agenda ────────────────────────────────────────────────────────────
+const expandedEvents = new Set()
+
+function toggleAgenda(evId) {
+  const ev  = events.find(e => e.id === evId)
+  const div = document.getElementById(`inline-agenda-${evId}`)
+  const chev = document.getElementById(`chev-${evId}`)
+  if (expandedEvents.has(evId)) {
+    expandedEvents.delete(evId)
+    div.style.display = 'none'
+    chev.className = 'chev closed'
+  } else {
+    expandedEvents.add(evId)
+    renderInlineAgenda(evId)
+    div.style.display = 'block'
+    chev.className = 'chev open'
+  }
+}
+
+function renderInlineAgenda(evId) {
+  const ev    = events.find(e => e.id === evId)
+  const items = (agendaItems[ev.personId] || []).filter(a => !a.done)
+  const div   = document.getElementById(`inline-agenda-${evId}`)
+  div.innerHTML = `
+    <div class="agenda-inline">
+      <ul>
+        ${items.length === 0
+          ? '<li style="color:var(--n300);font-size:.8125rem">Вопросов пока нет</li>'
+          : items.map(a => `
+            <li>
+              <input type="checkbox" ${a.done?'checked':''} onchange="toggleAgendaItem(${a.id},${ev.personId},${evId},this.checked)" />
+              ${a.text}
+            </li>`).join('')}
+      </ul>
+      <input class="agenda-mini-input" placeholder="+ добавить вопрос (Enter)" onkeydown="addAgendaInline(event,${ev.personId},${evId})" />
+      <button class="open-full">открыть карточку ${PEOPLE[ev.personId]} →</button>
+    </div>`
+}
+
+function toggleAgendaItem(itemId, personId, evId, done) {
+  const items = agendaItems[personId] || []
+  const item  = items.find(a => a.id === itemId)
+  if (item) item.done = done
+  renderInlineAgenda(evId)
+  // re-render agenda toggle badge
+  render()
+}
+
+function addAgendaInline(e, personId, evId) {
+  if (e.key !== 'Enter') return
+  const text = e.target.value.trim()
+  if (!text) return
+  const items = agendaItems[personId] || []
+  items.push({ id: Date.now(), text, done: false })
+  agendaItems[personId] = items
+  e.target.value = ''
+  renderInlineAgenda(evId)
+}
+
+// ─── Panel ────────────────────────────────────────────────────────────────────
+let editingId = null
+
+function openPanel(id) {
+  editingId = id
+  const panel  = document.getElementById('panel')
+  const title  = document.getElementById('panel-title')
+  const delBtn = document.getElementById('panel-delete')
+  const spawn  = document.getElementById('spawn-section')
+  document.getElementById('overlay').style.display = 'block'
+  panel.style.display = 'flex'
+
+  if (id === null) {
+    // Adding new
+    title.textContent = 'Новое событие'
+    delBtn.style.display = 'none'
+    spawn.style.display  = 'none'
+    document.getElementById('f-title').value   = ''
+    document.getElementById('f-kind').value    = 'MEETING'
+    document.getElementById('f-date').value    = toISO(today)
+    document.getElementById('f-start').value   = ''
+    document.getElementById('f-end').value     = ''
+    document.getElementById('f-person').value  = ''
+    document.getElementById('f-project').value = ''
+  } else {
+    // Editing existing
+    const ev = events.find(e => e.id === id)
+    title.textContent = 'Редактировать событие'
+    delBtn.style.display = 'block'
+    // Show spawn-task section only for meetings
+    spawn.style.display = ev.kind === 'MEETING' ? 'flex' : 'none'
+    document.getElementById('f-title').value   = ev.title
+    document.getElementById('f-kind').value    = ev.kind
+    document.getElementById('f-date').value    = ev.date
+    document.getElementById('f-start').value   = ev.startTime || ''
+    document.getElementById('f-end').value     = ev.endTime   || ''
+    document.getElementById('f-person').value  = ev.personId  || ''
+    document.getElementById('f-project').value = ev.projectId || ''
+  }
+}
+
+function closePanel() {
+  document.getElementById('panel').style.display   = 'none'
+  document.getElementById('overlay').style.display = 'none'
+  editingId = null
+}
+
+function saveEvent() {
+  const title = document.getElementById('f-title').value.trim()
+  if (!title) return
+
+  const data = {
+    title,
+    kind:      document.getElementById('f-kind').value,
+    date:      document.getElementById('f-date').value,
+    startTime: document.getElementById('f-start').value  || null,
+    endTime:   document.getElementById('f-end').value    || null,
+    personId:  Number(document.getElementById('f-person').value)  || null,
+    projectId: Number(document.getElementById('f-project').value) || null,
+  }
+
+  if (editingId === null) {
+    events.push({ id: nextId++, ...data })
+    toast('Событие добавлено')
+  } else {
+    const idx = events.findIndex(e => e.id === editingId)
+    if (idx !== -1) events[idx] = { ...events[idx], ...data }
+    toast('Сохранено')
+  }
+  closePanel()
+  render()
+}
+
+function confirmDelete(id) {
+  // In a real app this would be a confirmation dialog
+  events = events.filter(e => e.id !== id)
+  closePanel()
+  render()
+  toast('Событие удалено')
+}
+
+function deleteEvent() {
+  if (editingId !== null) confirmDelete(editingId)
+}
+
+// Улучшение 3: spawn task from event
+function spawnTask() {
+  const taskTitle = document.getElementById('f-task-title').value.trim()
+  if (!taskTitle) return
+  const ev = events.find(e => e.id === editingId)
+  const info = []
+  if (ev.personId)  info.push(`исполнитель: ${PEOPLE[ev.personId]}`)
+  if (ev.projectId) info.push(`проект: ${PROJECTS[ev.projectId]}`)
+  document.getElementById('f-task-title').value = ''
+  toast(`Задача создана${info.length ? ' · ' + info.join(', ') : ''}`)
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+const WDAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
+const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек']
+
+function fmtDay(d, isToday) {
+  const base = `${WDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]}`
+  if (isToday) return `Сегодня · ${base}`
+  return base
+}
+
+function fmtShort(d) {
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast')
+  el.textContent = msg
+  el.classList.add('show')
+  setTimeout(() => el.classList.remove('show'), 2200)
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+render()
+</script>
+</body>
+</html>

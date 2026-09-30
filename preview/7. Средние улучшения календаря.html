@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GTD — Средние улучшения</title>
+<style>
+  :root {
+    /* Neutral ramp */
+    --n950: #111110;
+    --n900: #1c1c1a;
+    --n800: #2a2a28;
+    --n700: #3d3d3a;
+    --n600: #545450;
+    --n500: #737370;
+    --n400: #a3a3a0;
+    --n300: #d4d4d0;
+    --n200: #e8e8e4;
+    --n100: #f4f4f0;
+    --n50:  #f9f9f7;
+
+    /* Blue accent */
+    --blue-700: #1a4fbf;
+    --blue-600: #2563eb;
+    --blue-500: #3b82f6;
+    --blue-200: #bfdbfe;
+    --blue-100: #dbeafe;
+    --blue-50:  #eff6ff;
+
+    /* Amber */
+    --amber-600: #d97706;
+    --amber-200: #fde68a;
+    --amber-100: #fef3c7;
+
+    /* Purple */
+    --purple-700: #7c22ce;
+    --purple-100: #f3e8ff;
+
+    /* Green */
+    --green-700: #15803d;
+    --green-100: #dcfce7;
+
+    /* Semantic tokens */
+    --surface:        #ffffff;
+    --surface-raised: var(--n50);
+    --border:         var(--n200);
+    --border-strong:  var(--n300);
+    --text-body:      var(--n900);
+    --text-muted:     var(--n500);
+    --text-faint:     var(--n400);
+    --accent:         var(--blue-600);
+
+    --radius-sm: .375rem;
+    --radius-md: .625rem;
+    --radius-lg: .875rem;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    background: var(--surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Shell ── */
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── Top nav ── */
+  .topnav {
+    display: flex; align-items: center; gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; height: 3rem;
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-size: .875rem; font-weight: 700; color: var(--text-body); letter-spacing: -.01em; }
+  .nav-tabs { display: flex; gap: 0; flex: 1; }
+  .nav-tab {
+    font-size: .8125rem; color: var(--text-faint);
+    background: none; border: none; cursor: pointer;
+    padding: 0 1rem; height: 3rem;
+    border-bottom: 2px solid transparent;
+    transition: color 120ms, border-color 120ms;
+  }
+  .nav-tab:hover  { color: var(--text-body); }
+  .nav-tab.active { color: var(--text-body); border-bottom-color: var(--n900); font-weight: 500; }
+
+  /* ─────────────────────────────────────────────────────────────
+     УЛУЧШЕНИЕ 2: Виджет «сегодня» — sticky строка под навигацией
+     ───────────────────────────────────────────────────────────── */
+  .today-bar {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .5rem 2rem;
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 3rem; z-index: 9;
+    font-size: .75rem; color: var(--text-muted);
+    overflow-x: auto; white-space: nowrap;
+  }
+  .today-bar-label {
+    font-size: .6875rem; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .today-chip {
+    display: inline-flex; align-items: center; gap: .375rem;
+    border-radius: 999px; padding: .2rem .65rem;
+    font-size: .6875rem; font-weight: 500;
+    flex-shrink: 0; cursor: default;
+  }
+  .chip-meeting  { background: var(--blue-50);   color: var(--blue-700); }
+  .chip-deadline { background: var(--amber-100); color: var(--amber-600); }
+  .chip-info     { background: var(--purple-100); color: var(--purple-700); }
+  .chip-dot { width: .5rem; height: .5rem; border-radius: 999px; }
+  .chip-meeting  .chip-dot { background: #60a5fa; }
+  .chip-deadline .chip-dot { background: #f59e0b; }
+  .chip-info     .chip-dot { background: #c4b5fd; }
+
+  .today-bar-empty { color: var(--text-faint); font-size: .75rem; font-style: italic; }
+
+  /* ── Main content ── */
+  .main { flex: 1; display: flex; }
+  .page { max-width: 42rem; width: 100%; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+  /* ── Page title ── */
+  .page-title { font-size: 1.5rem; font-weight: 600; }
+  .page-sub   { margin-top: .25rem; font-size: .875rem; color: var(--text-faint); }
+
+  /* ─────────────────────────────────────────────────────────────
+     УЛУЧШЕНИЕ 3: Фильтр по проекту
+     ───────────────────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; align-items: center; gap: .5rem;
+    margin-top: 1.5rem; flex-wrap: wrap;
+  }
+  .filter-label { font-size: .6875rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
+  .filter-pill {
+    font-size: .75rem; padding: .3rem .75rem;
+    border-radius: 999px; border: 1px solid var(--border);
+    background: none; cursor: pointer; color: var(--text-muted);
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .filter-pill:hover  { background: var(--n100); color: var(--text-body); }
+  .filter-pill.active {
+    background: var(--n900); color: #fff; border-color: var(--n900);
+  }
+  .filter-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.125rem; height: 1.125rem; border-radius: 999px;
+    background: var(--blue-100); color: var(--blue-700);
+    font-size: .625rem; font-weight: 700; margin-left: .25rem;
+  }
+  .filter-pill.active .filter-count { background: rgba(255,255,255,.2); color: #fff; }
+
+  /* ── Divider ── */
+  .section-divider {
+    margin-top: 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-head {
+    font-size: .6875rem; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-faint);
+  }
+  .section-count { font-size: .6875rem; color: var(--text-faint); }
+
+  /* ── Event list (calendar view) ── */
+  .day { margin-top: 1.75rem; }
+  .day-label {
+    font-size: .6875rem; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-faint);
+  }
+  .day-label.today { color: var(--text-body); }
+  .events { margin-top: .5rem; border-top: 1px solid var(--n100); }
+  .event {
+    display: flex; align-items: flex-start; gap: 3rem;
+    padding: .7rem 0; border-bottom: 1px solid var(--n100);
+  }
+  .ev-time { width: 5rem; flex-shrink: 0; font-size: .8125rem; color: var(--text-muted); tabular-nums: tabular; }
+  .ev-rail { width: 3px; flex-shrink: 0; align-self: stretch; border-radius: 2px; min-height: 1.25rem; }
+  .ev-body { flex: 1; min-width: 0; }
+  .ev-title { font-size: .9375rem; color: var(--text-body); }
+  .ev-meta  { font-size: .75rem; color: var(--text-faint); margin-top: .1rem; }
+
+  /* ─────────────────────────────────────────────────────────────
+     УЛУЧШЕНИЕ 1: Блок «сегодня в календаре» в утреннем обзоре
+     ───────────────────────────────────────────────────────────── */
+  .morning-calendar-block {
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .mcb-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .625rem 1rem;
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--border);
+  }
+  .mcb-title {
+    font-size: .6875rem; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-faint);
+  }
+  .mcb-date { font-size: .6875rem; color: var(--text-faint); }
+
+  .mcb-body { padding: .25rem 0; }
+  .mcb-row {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .5rem 1rem;
+  }
+  .mcb-time {
+    width: 4.5rem; flex-shrink: 0;
+    font-size: .75rem; font-variant-numeric: tabular-nums; color: var(--text-muted);
+  }
+  .mcb-rail { width: 3px; flex-shrink: 0; border-radius: 2px; align-self: stretch; min-height: 1.125rem; }
+  .mcb-info { flex: 1; min-width: 0; }
+  .mcb-name { font-size: .875rem; color: var(--text-body); }
+  .mcb-sub  { font-size: .6875rem; color: var(--text-faint); margin-top: .1rem; }
+
+  .mcb-empty {
+    padding: .75rem 1rem;
+    font-size: .875rem; color: var(--n300); font-style: italic;
+  }
+
+  /* Separator between calendar block and tasks below */
+  .mcb-separator {
+    margin: 0 1rem;
+    border: none; border-top: 1px dashed var(--border);
+    margin-bottom: .25rem; margin-top: .25rem;
+  }
+  .mcb-next-label {
+    padding: .25rem 1rem .5rem;
+    font-size: .6875rem; color: var(--text-faint); font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+
+  /* ── Morning review task rows ── */
+  .task-list { list-style: none; border-top: 1px solid var(--n100); margin-top: .75rem; }
+  .task-row  { display: flex; align-items: center; gap: .875rem; padding: .75rem 0; border-bottom: 1px solid var(--n100); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: .9375rem; color: var(--text-body); }
+  .task-meta  { font-size: .75rem; color: var(--text-faint); margin-top: .125rem; }
+  .badge {
+    flex-shrink: 0; font-size: .6875rem; border-radius: var(--radius-sm);
+    padding: .2rem .5rem; font-weight: 500;
+  }
+  .badge-amber { background: var(--amber-100); color: var(--amber-600); }
+  .badge-green { background: var(--green-100); color: var(--green-700); }
+
+  /* Кнопки в задачах */
+  .row-actions { display: flex; gap: .375rem; flex-shrink: 0; }
+  .act-btn {
+    font-size: .6875rem; border-radius: var(--radius-sm);
+    padding: .2rem .55rem; border: none; cursor: pointer;
+    background: var(--n100); color: var(--n600);
+    transition: background 120ms;
+  }
+  .act-btn:hover { background: var(--n200); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 100; background: var(--n900); color: #fff;
+    font-size: .8125rem; border-radius: var(--radius-md);
+    padding: .5rem 1.125rem; pointer-events: none;
+    opacity: 0; transition: opacity 200ms;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    margin-top: 4rem; text-align: center;
+    font-size: .875rem; color: var(--n300); font-style: italic;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--n200); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Top nav -->
+  <nav class="topnav">
+    <span class="logo">GTD</span>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('morning')">Утренний обзор</button>
+      <button class="nav-tab" onclick="switchTab('tasks')">Все задачи</button>
+      <button class="nav-tab" onclick="switchTab('week')">Обзор недели</button>
+      <button class="nav-tab" onclick="switchTab('calendar')">Календарь</button>
+    </div>
+  </nav>
+
+  <!-- УЛУЧШЕНИЕ 2: Виджет «сегодня» — всегда виден на всех вкладках -->
+  <div class="today-bar" id="today-bar"></div>
+
+  <main class="main">
+    <div class="page">
+
+      <!-- ═══════════════════════════════════════════════════════
+           ВКЛАДКА: Утренний обзор
+           ═══════════════════════════════════════════════════════ -->
+      <div id="tab-morning">
+        <h1 class="page-title">Утренний обзор</h1>
+        <p class="page-sub">3 задачи требуют решения</p>
+
+        <!-- УЛУЧШЕНИЕ 1: блок «сегодня в календаре» вверху обзора -->
+        <div class="morning-calendar-block">
+          <div class="mcb-head">
+            <span class="mcb-title">Сегодня в календаре</span>
+            <span class="mcb-date" id="mcb-date"></span>
+          </div>
+          <div class="mcb-body" id="mcb-body"></div>
+        </div>
+
+        <!-- Требуют внимания -->
+        <div class="section-divider" style="margin-top:2rem">
+          <span class="section-head">Требуют внимания</span>
+          <span class="section-count">2</span>
+        </div>
+        <ul class="task-list">
+          <li class="task-row">
+            <div class="task-body">
+              <div class="task-title">Согласовать макет с клиентом</div>
+              <div class="task-meta">ждёт Ивана · от Алины</div>
+            </div>
+            <span class="badge badge-amber">12 дн ⚠</span>
+          </li>
+          <li class="task-row">
+            <div class="task-body">
+              <div class="task-title">Прислать договор на подпись</div>
+              <div class="task-meta">ждёт Петра</div>
+            </div>
+            <span class="badge badge-amber">8 дн</span>
+          </li>
+        </ul>
+
+        <!-- Разобрать входящие -->
+        <div class="section-divider">
+          <span class="section-head">Разобрать входящие</span>
+          <span class="section-count">1</span>
+        </div>
+        <ul class="task-list">
+          <li class="task-row">
+            <div class="task-body">
+              <div class="task-title">Проверить правки по редизайну</div>
+              <div class="task-meta">от Алины</div>
+            </div>
+            <div class="row-actions">
+              <button class="act-btn" onclick="toast('Задача взята себе')">взять себе</button>
+              <button class="act-btn" onclick="toast('Задача передана')">передать</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════
+           ВКЛАДКА: Все задачи (показываем фильтр по проекту)
+           ═══════════════════════════════════════════════════════ -->
+      <div id="tab-tasks" style="display:none">
+        <h1 class="page-title">Все задачи</h1>
+        <p class="page-sub">16 задач · 3 проекта</p>
+
+        <!-- УЛУЧШЕНИЕ 3: Фильтр по проекту -->
+        <div class="filter-bar" id="project-filter"></div>
+
+        <!-- Список задач (фильтруется) -->
+        <div id="task-list-container"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════
+           ВКЛАДКА: Обзор недели
+           ═══════════════════════════════════════════════════════ -->
+      <div id="tab-week" style="display:none">
+        <h1 class="page-title">Обзор недели</h1>
+        <p class="page-sub">Виджет «сегодня» виден вверху — переходить на Календарь не нужно.</p>
+        <div class="empty-state">Здесь будет обзор недели</div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════
+           ВКЛАДКА: Календарь (фильтр по проекту здесь тоже)
+           ═══════════════════════════════════════════════════════ -->
+      <div id="tab-calendar" style="display:none">
+        <h1 class="page-title">Календарь</h1>
+        <p class="page-sub">Жёсткий ландшафт недели.</p>
+
+        <!-- УЛУЧШЕНИЕ 3: Фильтр по проекту в календаре -->
+        <div class="filter-bar" id="cal-project-filter"></div>
+
+        <div id="cal-days"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+const TODAY = new Date(); TODAY.setHours(0,0,0,0)
+function toISO(d) { return d.toISOString().slice(0,10) }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r }
+
+const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек']
+const WDAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
+function fmtDay(d) {
+  const iso = toISO(d)
+  const isToday = iso === toISO(TODAY)
+  const base = `${WDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`
+  return { label: isToday ? `Сегодня · ${base}` : base, isToday }
+}
+function fmtLong(d) {
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
+}
+
+const PROJECTS = [
+  { id: 0,  name: 'Все проекты' },
+  { id: 1,  name: 'Годовой план' },
+  { id: 2,  name: 'Редизайн сайта' },
+  { id: 3,  name: 'Найм команды' },
+]
+
+const RAIL = { MEETING: '#60a5fa', DEADLINE: '#f59e0b', INFO: '#c4b5fd' }
+const KIND_LABEL = { MEETING: 'Встреча', DEADLINE: 'Дедлайн', INFO: 'Информация дня' }
+
+// Сегодня + следующие 6 дней
+const events = [
+  { id:1, title:'Стендап команды',       kind:'MEETING',  date: toISO(TODAY),         startTime:'10:00', endTime:'10:30', project: null, person:'Иван' },
+  { id:2, title:'Встреча по бюджету',    kind:'MEETING',  date: toISO(TODAY),         startTime:'15:00', endTime:'16:00', project: 1,    person:'Пётр' },
+  { id:3, title:'Сдать квартальный отчёт',kind:'DEADLINE',date: toISO(TODAY),         startTime:null,    endTime:null,    project: 1,    person: null },
+  { id:4, title:'Прилетает клиент',      kind:'INFO',     date: toISO(addDays(TODAY,1)), startTime:null, endTime:null,    project: 2,    person: null },
+  { id:5, title:'Обед с Петром',         kind:'MEETING',  date: toISO(addDays(TODAY,2)), startTime:'12:00',endTime:'13:00',project: null, person:'Пётр' },
+  { id:6, title:'Ревью кандидатов',      kind:'MEETING',  date: toISO(addDays(TODAY,3)), startTime:'11:00',endTime:'12:00',project: 3,    person:'Алина' },
+  { id:7, title:'Дедлайн по дизайну',    kind:'DEADLINE', date: toISO(addDays(TODAY,4)), startTime:null,  endTime:null,   project: 2,    person: null },
+  { id:8, title:'Встреча по найму',      kind:'MEETING',  date: toISO(addDays(TODAY,5)), startTime:'14:00',endTime:'15:00',project: 3,   person:'Иван' },
+]
+
+const tasks = [
+  { id:1,  title:'Согласовать макет',        status:'IN_PROGRESS', project:2, person:'Иван' },
+  { id:2,  title:'Прислать договор',         status:'WAITING',     project:1, person:'Пётр' },
+  { id:3,  title:'Подготовить презентацию',  status:'IN_PROGRESS', project:1, person: null  },
+  { id:4,  title:'Обновить roadmap',         status:'NEXT',        project:1, person: null  },
+  { id:5,  title:'Написать JD для дизайнера',status:'IN_PROGRESS', project:3, person: null  },
+  { id:6,  title:'Провести интервью',        status:'NEXT',        project:3, person:'Алина'},
+  { id:7,  title:'Верстка главной страницы', status:'IN_PROGRESS', project:2, person: null  },
+  { id:8,  title:'Тесты на мобайл',          status:'NEXT',        project:2, person: null  },
+]
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let activeTab        = 'morning'
+let activeProjectId  = 0   // 0 = все
+let activeCalProject = 0
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab
+  document.querySelectorAll('.nav-tab').forEach((el, i) => {
+    const names = ['morning','tasks','week','calendar']
+    el.classList.toggle('active', names[i] === tab)
+  })
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none')
+  document.getElementById(`tab-${tab}`).style.display = 'block'
+  if (tab === 'tasks')    renderTasksTab()
+  if (tab === 'calendar') renderCalendarTab()
+}
+
+// ─── УЛУЧШЕНИЕ 2: Виджет «сегодня» ───────────────────────────────────────────
+function renderTodayBar() {
+  const bar = document.getElementById('today-bar')
+  const todayEvents = events
+    .filter(e => e.date === toISO(TODAY))
+    .sort((a,b) => {
+      if (a.startTime && b.startTime) return a.startTime.localeCompare(b.startTime)
+      if (a.startTime) return -1; if (b.startTime) return 1; return 0
+    })
+
+  let html = `<span class="today-bar-label">Сегодня</span>`
+  if (todayEvents.length === 0) {
+    html += `<span class="today-bar-empty">Событий нет</span>`
+  } else {
+    todayEvents.forEach(ev => {
+      const time = ev.startTime || 'весь день'
+      const cls = ev.kind === 'MEETING' ? 'chip-meeting' : ev.kind === 'DEADLINE' ? 'chip-deadline' : 'chip-info'
+      html += `
+        <span class="today-chip ${cls}">
+          <i class="chip-dot"></i>
+          ${time !== 'весь день' ? `<span style="font-variant-numeric:tabular-nums">${time}</span>` : ''}
+          ${ev.title}
+        </span>`
+    })
+  }
+  bar.innerHTML = html
+}
+
+// ─── УЛУЧШЕНИЕ 1: Блок «сегодня в календаре» в утреннем обзоре ──────────────
+function renderMorningCalendarBlock() {
+  document.getElementById('mcb-date').textContent = fmtLong(TODAY)
+
+  const todayEvents = events
+    .filter(e => e.date === toISO(TODAY))
+    .sort((a,b) => {
+      if (a.startTime && b.startTime) return a.startTime.localeCompare(b.startTime)
+      if (a.startTime) return -1; if (b.startTime) return 1; return 0
+    })
+
+  const body = document.getElementById('mcb-body')
+  if (todayEvents.length === 0) {
+    body.innerHTML = '<div class="mcb-empty">Сегодня событий нет</div>'
+    return
+  }
+
+  let html = ''
+  const meetings  = todayEvents.filter(e => e.kind === 'MEETING')
+  const deadlines = todayEvents.filter(e => e.kind !== 'MEETING')
+
+  meetings.forEach(ev => {
+    const time = ev.startTime
+      ? (ev.endTime ? `${ev.startTime}–${ev.endTime}` : ev.startTime)
+      : 'весь день'
+    const proj = ev.project ? PROJECTS.find(p => p.id === ev.project)?.name : null
+    const sub  = [ev.person && `с ${ev.person}`, proj && `⬡ ${proj}`].filter(Boolean).join(' · ')
+    html += `
+      <div class="mcb-row">
+        <span class="mcb-time">${time}</span>
+        <span class="mcb-rail" style="background:${RAIL[ev.kind]}"></span>
+        <div class="mcb-info">
+          <div class="mcb-name">${ev.title}</div>
+          ${sub ? `<div class="mcb-sub">${sub}</div>` : ''}
+        </div>
+      </div>`
+  })
+
+  if (meetings.length > 0 && deadlines.length > 0) {
+    html += '<hr class="mcb-separator" />'
+    html += '<div class="mcb-next-label">Дедлайны и важное</div>'
+  }
+
+  deadlines.forEach(ev => {
+    const proj = ev.project ? PROJECTS.find(p => p.id === ev.project)?.name : null
+    html += `
+      <div class="mcb-row">
+        <span class="mcb-time" style="color:var(--text-faint)">весь день</span>
+        <span class="mcb-rail" style="background:${RAIL[ev.kind]}"></span>
+        <div class="mcb-info">
+          <div class="mcb-name">${ev.title}</div>
+          ${proj ? `<div class="mcb-sub">⬡ ${proj}</div>` : ''}
+        </div>
+      </div>`
+  })
+
+  body.innerHTML = html
+}
+
+// ─── УЛУЧШЕНИЕ 3: Фильтр по проекту — Все задачи ─────────────────────────────
+function renderProjectFilter(containerId, active, onSelect) {
+  const container = document.getElementById(containerId)
+  let html = `<span class="filter-label">Проект</span>`
+  PROJECTS.forEach(p => {
+    const count = p.id === 0
+      ? tasks.length
+      : tasks.filter(t => t.project === p.id).length
+    const isActive = active === p.id
+    html += `
+      <button
+        class="filter-pill ${isActive ? 'active' : ''}"
+        onclick="(${onSelect})(${p.id})"
+      >
+        ${p.name}
+        ${p.id !== 0 ? `<span class="filter-count">${count}</span>` : ''}
+      </button>`
+  })
+  container.innerHTML = html
+}
+
+function renderTasksTab() {
+  renderProjectFilter('project-filter', activeProjectId, 'selectProject')
+  renderTaskList()
+}
+
+function selectProject(id) {
+  activeProjectId = id
+  renderProjectFilter('project-filter', activeProjectId, 'selectProject')
+  renderTaskList()
+}
+
+function renderTaskList() {
+  const container = document.getElementById('task-list-container')
+  const filtered = activeProjectId === 0
+    ? tasks
+    : tasks.filter(t => t.project === activeProjectId)
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state">Задач по этому проекту нет</div>'
+    return
+  }
+
+  const STATUS_LABEL = { IN_PROGRESS:'В работе', WAITING:'Ожидание', NEXT:'Следующее', INBOX:'Входящие' }
+  let html = '<ul class="task-list">'
+  filtered.forEach(t => {
+    const proj = t.project ? PROJECTS.find(p => p.id === t.project)?.name : null
+    const meta = [proj && `⬡ ${proj}`, t.person && `→ ${t.person}`].filter(Boolean).join(' · ')
+    html += `
+      <li class="task-row">
+        <div class="task-body">
+          <div class="task-title">${t.title}</div>
+          ${meta ? `<div class="task-meta">${meta}</div>` : ''}
+        </div>
+        <span class="badge" style="background:var(--n100);color:var(--n600)">${STATUS_LABEL[t.status]}</span>
+      </li>`
+  })
+  html += '</ul>'
+  container.innerHTML = html
+}
+
+// ─── УЛУЧШЕНИЕ 3: Фильтр по проекту — Календарь ──────────────────────────────
+function renderCalendarTab() {
+  renderCalProjectFilter()
+  renderCalDays()
+}
+
+function renderCalProjectFilter() {
+  const container = document.getElementById('cal-project-filter')
+  let html = `<span class="filter-label">Проект</span>`
+  PROJECTS.forEach(p => {
+    const count = p.id === 0
+      ? events.length
+      : events.filter(e => e.project === p.id).length
+    const isActive = activeCalProject === p.id
+    html += `
+      <button
+        class="filter-pill ${isActive ? 'active' : ''}"
+        onclick="selectCalProject(${p.id})"
+      >
+        ${p.name}
+        ${p.id !== 0 ? `<span class="filter-count">${count}</span>` : ''}
+      </button>`
+  })
+  container.innerHTML = html
+}
+
+function selectCalProject(id) {
+  activeCalProject = id
+  renderCalProjectFilter()
+  renderCalDays()
+}
+
+function renderCalDays() {
+  const container = document.getElementById('cal-days')
+  const filteredEvents = activeCalProject === 0
+    ? events
+    : events.filter(e => e.project === activeCalProject)
+
+  // собрать уникальные даты
+  const dates = [...new Set(filteredEvents.map(e => e.date))].sort()
+
+  if (dates.length === 0) {
+    container.innerHTML = '<div class="empty-state">Событий по этому проекту нет</div>'
+    return
+  }
+
+  let html = ''
+  dates.forEach(iso => {
+    const d = new Date(iso + 'T00:00:00')
+    const { label, isToday } = fmtDay(d)
+    const dayEvs = filteredEvents
+      .filter(e => e.date === iso)
+      .sort((a,b) => {
+        if (a.startTime && b.startTime) return a.startTime.localeCompare(b.startTime)
+        if (a.startTime) return -1; if (b.startTime) return 1; return 0
+      })
+
+    html += `
+      <div class="day">
+        <div class="day-label ${isToday ? 'today' : ''}">${label}</div>
+        <div class="events">`
+
+    dayEvs.forEach(ev => {
+      const time = ev.startTime
+        ? (ev.endTime ? `${ev.startTime}–${ev.endTime}` : ev.startTime)
+        : 'весь день'
+      const proj = ev.project ? PROJECTS.find(p => p.id === ev.project)?.name : null
+      const meta = [ev.person && `с ${ev.person}`, proj && `⬡ ${proj}`].filter(Boolean).join(' · ')
+      html += `
+        <div class="event">
+          <span class="ev-time">${time}</span>
+          <span class="ev-rail" style="background:${RAIL[ev.kind]}"></span>
+          <div class="ev-body">
+            <div class="ev-title">${ev.title}</div>
+            ${meta ? `<div class="ev-meta">${meta}</div>` : ''}
+          </div>
+        </div>`
+    })
+
+    html += `</div></div>`
+  })
+  container.innerHTML = html
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast-el')
+  el.textContent = msg
+  el.classList.add('show')
+  setTimeout(() => el.classList.remove('show'), 2200)
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+renderTodayBar()
+renderMorningCalendarBlock()
+</script>
+</body>
+</html>

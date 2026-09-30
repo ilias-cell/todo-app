@@ -1,0 +1,55 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --n-0:  oklch(98.5% 0.002 264);
+  --n-1:  oklch(97%   0.002 264);
+  --n-2:  oklch(93%   0.003 264);
+  --n-3:  oklch(88%   0.004 264);
+  --n-4:  oklch(82%   0.004 264);
+  --n-5:  oklch(68%   0.006 264);
+  --n-6:  oklch(52%   0.008 264);
+  --n-7:  oklch(38%   0.010 264);
+  --n-8:  oklch(24%   0.012 264);
+  --n-9:  oklch(15%   0.014 264);
+
+  --bg:           var(--n-0);
+  --surface:      var(--n-1);
+  --raised:       var(--n-2);
+  --border:       var(--n-3);
+  --border-soft:  var(--n-4);
+  --text:         var(--n-9);
+  --text-sec:     var(--n-7);
+  --text-muted:   var(--n-6);
+  --text-ghost:   var(--n-5);
+  --accent:       var(--n-9);
+  --accent-fg:    var(--n-0);
+  --pill-bg:      var(--n-2);
+  --pill-text:    var(--n-7);
+
+  --warn:        oklch(68% 0.14  68);
+  --warn-bg:     oklch(96% 0.04  80);
+  --info:        oklch(60% 0.14 240);
+  --info-bg:     oklch(96% 0.03 240);
+  --success:     oklch(58% 0.14 148);
+  --success-bg:  oklch(96% 0.03 148);
+  --danger:      oklch(55% 0.18  25);
+  --danger-bg:   oklch(97% 0.03  25);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI',
+               Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+}

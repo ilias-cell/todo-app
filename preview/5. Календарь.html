@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GTD — Календарь (макет 1+2)</title>
+<style>
+  :root {
+    --n900:#171717; --n700:#404040; --n500:#737373; --n400:#a3a3a3;
+    --n300:#d4d4d4; --n200:#e5e5e5; --n100:#f5f5f5; --n50:#fafafa;
+    --purple-bg:#f3e8ff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--n900); background:#fff; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:42rem; margin:0 auto; padding:3rem 1.5rem; }
+
+  /* Вкладки */
+  .tabs { display:flex; gap:1.5rem; border-bottom:1px solid var(--n200); padding-bottom:.75rem; margin-bottom:2rem; }
+  .tab { font-size:.875rem; color:var(--n400); background:none; border:none; cursor:pointer; padding:0; }
+  .tab.active { color:var(--n900); font-weight:500; }
+
+  h1 { font-size:1.5rem; font-weight:600; }
+  .sub { font-size:.875rem; color:var(--n400); margin-top:.25rem; }
+
+  .legend { display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem; font-size:.75rem; color:var(--n500); }
+  .legend span { display:flex; align-items:center; gap:.375rem; }
+  .dot { width:.6rem; height:.6rem; border-radius:999px; display:inline-block; }
+
+  .add { margin-top:1.5rem; display:flex; gap:.5rem; }
+  .add input { flex:1; border:1px solid var(--n300); border-radius:.5rem; padding:.5rem .75rem; font-size:.875rem; }
+  .add button { background:var(--n900); color:#fff; border:none; border-radius:.5rem; padding:.5rem 1rem; font-size:.875rem; cursor:pointer; }
+
+  /* День */
+  .day { margin-top:2rem; }
+  .day-head { display:flex; align-items:baseline; justify-content:space-between; }
+  .day-title { font-size:.75rem; font-weight:600; letter-spacing:.05em; color:var(--n400); text-transform:uppercase; }
+  .day-title.today { color:var(--n900); }
+  .day-count { font-size:.75rem; color:var(--n400); }
+  .events { margin-top:.5rem; border-top:1px solid var(--n100); }
+
+  /* Событие */
+  .event { padding:.75rem 0; border-bottom:1px solid var(--n100); }
+  .event-main { display:flex; gap:.875rem; align-items:flex-start; }
+  .time { width:5.5rem; flex-shrink:0; font-size:.8125rem; color:var(--n500); font-variant-numeric:tabular-nums; }
+  .time.allday { color:var(--n400); }
+  .rail { width:3px; align-self:stretch; border-radius:2px; background:var(--n300); flex-shrink:0; min-height:1.5rem; }
+  .rail.meeting { background:#60a5fa; }
+  .rail.deadline { background:#f59e0b; }
+  .rail.info { background:#c4b5fd; }
+  .ev-body { min-width:0; flex:1; }
+  .ev-title { font-size:.9375rem; }
+  .ev-meta { font-size:.75rem; color:var(--n400); margin-top:.125rem; }
+  .person-link { color:var(--n500); text-decoration:underline; text-decoration-color:var(--n300); text-underline-offset:2px; cursor:pointer; }
+
+  /* Инлайн-agenda внутри встречи (вариант 1) */
+  .agenda-toggle {
+    margin-top:.5rem; display:inline-flex; align-items:center; gap:.375rem;
+    font-size:.6875rem; border-radius:999px; padding:.15rem .55rem;
+    background:var(--purple-bg); color:#6b21a8; border:none; cursor:pointer;
+  }
+  .agenda-toggle .chev { transition:transform .15s; }
+  .agenda-inline {
+    margin:.5rem 0 0 6.375rem; /* выравнивание под ev-body */
+    border-left:2px solid var(--purple-bg); padding:.25rem 0 .25rem .75rem;
+  }
+  .agenda-inline ul { list-style:none; }
+  .agenda-inline li {
+    font-size:.8125rem; color:var(--n700); padding:.2rem 0 .2rem 1rem;
+    position:relative; display:flex; align-items:center; gap:.5rem;
+  }
+  .agenda-inline li::before { content:"—"; position:absolute; left:0; color:var(--n300); }
+  .agenda-inline .add-mini { margin-top:.4rem; }
+  .agenda-inline .add-mini input {
+    width:100%; border:1px solid var(--n200); border-radius:.4rem;
+    padding:.3rem .5rem; font-size:.75rem;
+  }
+  .open-full {
+    margin-top:.5rem; font-size:.6875rem; color:var(--n400);
+    background:none; border:none; cursor:pointer; text-decoration:underline;
+  }
+
+  .empty { font-size:.875rem; color:var(--n300); padding:.75rem 0; }
+
+  .note { margin-top:2.5rem; padding:1rem; background:var(--n50); border-radius:.75rem; font-size:.8125rem; color:var(--n500); }
+  .note strong { color:var(--n700); font-weight:600; }
+
+  /* Slide-over панель по человеку (вариант 2) */
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.2); }
+  .panel {
+    position:fixed; top:0; right:0; height:100%; width:22rem; max-width:90vw;
+    background:#fff; box-shadow:-8px 0 24px rgba(0,0,0,.08);
+    padding:1.5rem; display:flex; flex-direction:column;
+  }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; }
+  .panel-head h2 { font-size:1.125rem; font-weight:600; display:flex; align-items:center; gap:.5rem; }
+  .panel-close { background:none; border:none; font-size:1.25rem; color:var(--n400); cursor:pointer; }
+  .panel-sub { font-size:.75rem; color:var(--n400); margin-top:.25rem; }
+  .panel-label { font-size:.6875rem; font-weight:600; letter-spacing:.05em; color:var(--n400); text-transform:uppercase; margin-top:1.5rem; }
+  .panel ul { list-style:none; margin-top:.5rem; }
+  .panel li {
+    display:flex; align-items:flex-start; gap:.5rem; padding:.5rem 0;
+    border-bottom:1px solid var(--n100); font-size:.875rem; color:var(--n700);
+  }
+  .panel li input[type=checkbox] { margin-top:.2rem; }
+  .panel .done { color:var(--n300); text-decoration:line-through; }
+  .panel-add { margin-top:.75rem; display:flex; gap:.5rem; }
+  .panel-add input { flex:1; border:1px solid var(--n300); border-radius:.5rem; padding:.45rem .6rem; font-size:.8125rem; }
+  .panel-add button { background:var(--n900); color:#fff; border:none; border-radius:.5rem; padding:.45rem .8rem; font-size:.8125rem; cursor:pointer; }
+  .panel-meetings { margin-top:auto; padding-top:1rem; border-top:1px solid var(--n200); font-size:.8125rem; color:var(--n500); }
+  .panel-meetings .mt { display:flex; justify-content:space-between; padding:.25rem 0; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="tabs">
+      <button class="tab">Утренний обзор</button>
+      <button class="tab">Все задачи</button>
+      <button class="tab">Обзор недели</button>
+      <button class="tab active">Календарь</button>
+    </nav>
+
+    <h1>Календарь</h1>
+    <p class="sub">Только жёсткий ландшафт: встречи, дедлайны дня и важная информация. Повестка к человеку — прямо в его встрече или по клику на имя.</p>
+
+    <div class="legend">
+      <span><i class="dot" style="background:#60a5fa"></i> Встреча</span>
+      <span><i class="dot" style="background:#f59e0b"></i> Дедлайн дня</span>
+      <span><i class="dot" style="background:#c4b5fd"></i> Информация дня</span>
+    </div>
+
+    <div class="add">
+      <input type="text" placeholder="Новое событие — например «Созвон с Ivan 15:00»" />
+      <button>Добавить</button>
+    </div>
+
+    <!-- СЕГОДНЯ -->
+    <section class="day">
+      <div class="day-head">
+        <span class="day-title today">Сегодня · Пн, 3 мар</span>
+        <span class="day-count">3 события</span>
+      </div>
+      <div class="events">
+
+        <div class="event">
+          <div class="event-main">
+            <span class="time">10:00–10:30</span>
+            <span class="rail meeting"></span>
+            <div class="ev-body">
+              <div class="ev-title">Стендап команды</div>
+              <div class="ev-meta">повтор ежедневно</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Встреча с раскрытой инлайн-agenda (вариант 1) -->
+        <div class="event">
+          <div class="event-main">
+            <span class="time">15:00–16:00</span>
+            <span class="rail meeting"></span>
+            <div class="ev-body">
+              <div class="ev-title">Встреча по бюджету с <span class="person-link">Иваном</span></div>
+              <div class="ev-meta">⬡ Проект: Годовой план</div>
+              <button class="agenda-toggle"><span class="chev">▾</span> @agenda: Иван · 3 вопроса</button>
+            </div>
+          </div>
+          <div class="agenda-inline">
+            <ul>
+              <li><input type="checkbox" /> Утвердить бюджет на Q2</li>
+              <li><input type="checkbox" /> Обсудить найм второго дизайнера</li>
+              <li><input type="checkbox" /> Статус по договору с подрядчиком</li>
+            </ul>
+            <div class="add-mini">
+              <input type="text" placeholder="+ добавить вопрос к Ивану" />
+            </div>
+            <button class="open-full">открыть карточку Ивана →</button>
+          </div>
+        </div>
+
+        <div class="event">
+          <div class="event-main">
+            <span class="time allday">весь день</span>
+            <span class="rail deadline"></span>
+            <div class="ev-body">
+              <div class="ev-title">Сдать квартальный отчёт</div>
+              <div class="ev-meta">дедлайн — время не задано</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ЗАВТРА -->
+    <section class="day">
+      <div class="day-head">
+        <span class="day-title">Завтра · Вт, 4 мар</span>
+        <span class="day-count">1 событие</span>
+      </div>
+      <div class="events">
+        <div class="event">
+          <div class="event-main">
+            <span class="time allday">весь день</span>
+            <span class="rail info"></span>
+            <div class="ev-body">
+              <div class="ev-title">Прилетает клиент из Берлина</div>
+              <div class="ev-meta">информация — действий не требует</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- СРЕДА -->
+    <section class="day">
+      <div class="day-head">
+        <span class="day-title">Ср, 5 мар</span>
+        <span class="day-count">1 событие</span>
+      </div>
+      <div class="events">
+        <!-- Встреча со свёрнутой agenda -->
+        <div class="event">
+          <div class="event-main">
+            <span class="time">12:00–13:00</span>
+            <span class="rail meeting"></span>
+            <div class="ev-body">
+              <div class="ev-title">Обед с <span class="person-link">Петром</span></div>
+              <button class="agenda-toggle"><span class="chev" style="transform:rotate(-90deg)">▾</span> @agenda: Пётр · 1 вопрос</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЧЕТВЕРГ -->
+    <section class="day">
+      <div class="day-head">
+        <span class="day-title">Чт, 6 мар</span>
+        <span class="day-count">0</span>
+      </div>
+      <div class="events">
+        <div class="empty">— свободный день —</div>
+      </div>
+    </section>
+
+    <div class="note">
+      <strong>Что изменилось.</strong> Повестка больше не в подвале. У встречи с человеком agenda раскрывается прямо в событии — видно и можно дописать вопрос, пока готовишься. А клик по имени открывает полную карточку человека справа: вся его повестка, галочки «обсудили», добавление и список ближайших встреч. Так agenda работает в обеих ролях — «накопить между встречами» и «поднять на встрече».
+    </div>
+  </div>
+
+  <!-- Slide-over панель по человеку (вариант 2) — показана открытой -->
+  <div class="overlay"></div>
+  <aside class="panel">
+    <div class="panel-head">
+      <h2><i class="dot" style="background:#c4b5fd"></i> Иван</h2>
+      <button class="panel-close">✕</button>
+    </div>
+    <p class="panel-sub">Руководитель · @agenda</p>
+
+    <div class="panel-label">Что обсудить</div>
+    <ul>
+      <li><input type="checkbox" /> Утвердить бюджет на Q2</li>
+      <li><input type="checkbox" /> Обсудить найм второго дизайнера</li>
+      <li><input type="checkbox" /> Статус по договору с подрядчиком</li>
+      <li class="done"><input type="checkbox" checked /> <span>Согласовать отпуск в июле</span></li>
+    </ul>
+    <div class="panel-add">
+      <input type="text" placeholder="+ новый вопрос к Ивану" />
+      <button>Добавить</button>
+    </div>
+
+    <div class="panel-meetings">
+      <div class="panel-label" style="margin-top:0">Ближайшие встречи</div>
+      <div class="mt"><span>Встреча по бюджету</span><span>сегодня 15:00</span></div>
+      <div class="mt"><span>Ретро квартала</span><span>пт, 14 мар</span></div>
+    </div>
+  </aside>
+</body>
+</html>

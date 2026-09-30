@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Review | GTD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 p-6">
+  <div class="mx-auto max-w-5xl bg-white rounded-xl shadow-sm p-6">
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-neutral-800">Еженедельный обзор</h1>
+        <p class="text-neutral-500">Пятница, 12 апреля 2024</p>
+      </div>
+      <button class="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-700">Запланировать следующий</button>
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="border border-neutral-200 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-neutral-500 mb-1">Завершено задач</h3>
+        <p class="text-2xl font-bold">14</p>
+      </div>
+      <div class="border border-neutral-200 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-neutral-500 mb-1">В работе</h3>
+        <p class="text-2xl font-bold">5</p>
+      </div>
+      <div class="border border-neutral-200 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-neutral-500 mb-1">Ожидают</h3>
+        <p class="text-2xl font-bold">3</p>
+      </div>
+    </div>
+
+    <!-- Секции -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Требуют определения -->
+      <div>
+        <h2 class="font-semibold text-neutral-800 mb-3">Требуют определения</h2>
+        <div class="space-y-3">
+          <div class="p-3 bg-neutral-50 rounded-lg">
+            <p class="font-medium">Идея для нового проекта</p>
+            <p class="text-sm text-neutral-500 mt-1">Без статуса · 2 недели</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Замороженные -->
+      <div>
+        <h2 class="font-semibold text-neutral-800 mb-3">Замороженные</h2>
+        <div class="space-y-3">
+          <div class="p-3 bg-neutral-50 rounded-lg">
+            <p class="font-medium">Обновить лендинг</p>
+            <p class="text-sm text-neutral-500 mt-1">Без движения · 18 дней</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Проекты без прогресса -->
+      <div class="md:col-span-2">
+        <h2 class="font-semibold text-neutral-800 mb-3">Проекты без прогресса</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-3 border border-neutral-200 rounded-lg">
+            <p class="font-medium">Ребрендинг</p>
+            <p class="text-sm text-neutral-500 mt-1">Последнее действие: 12 марта</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

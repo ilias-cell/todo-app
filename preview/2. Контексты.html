@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контексты | GTD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .context-phone { background-color: #EFF6FF; color: #1D4ED8; }
+    .context-computer { background-color: #ECFDF5; color: #047857; }
+    .context-office { background-color: #FEF2F2; color: #B91C1C; }
+  </style>
+</head>
+<body class="bg-neutral-50 p-6">
+  <div class="mx-auto max-w-3xl bg-white rounded-xl shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-neutral-800 mb-6">Задачи с контекстами</h1>
+    
+    <!-- Фильтры -->
+    <div class="flex gap-2 mb-6">
+      <button class="px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-sm">Все</button>
+      <button class="px-3 py-1 rounded-full context-computer text-sm">@компьютер</button>
+      <button class="px-3 py-1 rounded-full context-phone text-sm">@телефон</button>
+      <button class="px-3 py-1 rounded-full context-office text-sm">@офис</button>
+    </div>
+
+    <!-- Список задач -->
+    <div class="space-y-4">
+      <div class="border-b border-neutral-100 pb-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-medium">Подготовить презентацию</h3>
+            <p class="text-sm text-neutral-500 mt-1">от ООО «Ромашка» · ждёт Аню</p>
+          </div>
+          <span class="context-computer px-2 py-0.5 rounded-full text-xs">@компьютер</span>
+        </div>
+      </div>
+
+      <div class="border-b border-neutral-100 pb-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-medium">Согласовать договор</h3>
+            <p class="text-sm text-neutral-500 mt-1">от Заказчик X · сам</p>
+          </div>
+          <div class="flex gap-1">
+            <span class="context-phone px-2 py-0.5 rounded-full text-xs">@телефон</span>
+            <span class="context-office px-2 py-0.5 rounded-full text-xs">@офис</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Добавление задачи -->
+    <div class="mt-8 border-t border-neutral-100 pt-6">
+      <form class="flex gap-2">
+        <input 
+          type="text" 
+          placeholder="Новая задача..." 
+          class="flex-1 border border-neutral-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 outline-none">
+        <button 
+          type="button"
+          class="px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-700">
+          Добавить
+        </button>
+      </form>
+      <div class="mt-2 flex gap-1">
+        <span class="context-computer px-2 py-0.5 rounded-full text-xs cursor-pointer">+ @компьютер</span>
+        <span class="context-phone px-2 py-0.5 rounded-full text-xs cursor-pointer">+ @телефон</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

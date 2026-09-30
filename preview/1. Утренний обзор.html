@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Задачи · превью «Бумага»</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  </style>
+</head>
+<body class="bg-neutral-100 text-neutral-800 antialiased">
+
+  <div class="mx-auto max-w-6xl px-6 py-12">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+
+      <!-- ==================== ЭКРАН 1: УТРЕННИЙ ОБЗОР ==================== -->
+      <section class="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+        <h1 class="text-2xl font-semibold text-neutral-900">Утренний обзор</h1>
+        <p class="mt-1 text-sm text-neutral-400">Четверг · 6 задач требуют решения</p>
+
+        <!-- Требуют внимания -->
+        <div class="mt-8 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">ТРЕБУЮТ ВНИМАНИЯ</span>
+          <span class="text-xs text-neutral-400">3</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <!-- строка -->
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Макет лендинга</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-bold text-neutral-600">А</span>
+                ждёт Аня · от ООО «Ромашка»
+              </p>
+            </div>
+            <span class="shrink-0 rounded-md bg-amber-100 px-2 py-0.5 text-xs text-amber-700">4 дн</span>
+          </li>
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Тексты для рассылки</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-bold text-neutral-600">И</span>
+                ждёт Игорь · от ИП Смирнов
+              </p>
+            </div>
+            <span class="shrink-0 rounded-md bg-red-100 px-2 py-0.5 text-xs text-red-700">11 дн ⚠</span>
+          </li>
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Смета на монтаж</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-bold text-neutral-600">П</span>
+                ждёт Пётр · от Завод «Сталь»
+              </p>
+            </div>
+            <span class="shrink-0 rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">2 дн</span>
+          </li>
+        </ul>
+
+        <!-- На проверке -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">НА ПРОВЕРКЕ</span>
+          <span class="text-xs text-neutral-400">2</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Договор с подрядчиком</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-bold text-neutral-600">С</span>
+                вернул Сергей · для заказчика X
+              </p>
+            </div>
+            <span class="shrink-0 rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-700">проверить</span>
+          </li>
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Отчёт за квартал</p>
+              <p class="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-bold text-neutral-600">Л</span>
+                вернула Лена · для заказчика Y
+              </p>
+            </div>
+            <span class="shrink-0 rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-700">проверить</span>
+          </li>
+        </ul>
+
+        <!-- Разобрать входящие -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">РАЗОБРАТЬ ВХОДЯЩИЕ</span>
+          <span class="text-xs text-neutral-400">1</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Запрос от нового клиента</p>
+              <p class="mt-0.5 text-xs text-neutral-400">от ООО «Вектор»</p>
+            </div>
+            <div class="flex shrink-0 gap-1.5">
+              <span class="rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">взять себе</span>
+              <span class="rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">передать</span>
+            </div>
+          </li>
+        </ul>
+
+        <p class="mt-8 text-center text-sm italic text-neutral-300">Разобрал повестку — экран пуст, день начат.</p>
+      </section>
+
+      <!-- ==================== ЭКРАН 2: ВСЕ ЗАДАЧИ ==================== -->
+      <section class="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+        <h1 class="text-2xl font-semibold text-neutral-900">Все задачи</h1>
+
+        <!-- Вкладки-фильтры -->
+        <nav class="mt-3 flex flex-wrap gap-4 text-sm">
+          <span class="font-medium text-neutral-900">Все</span>
+          <span class="text-neutral-400">Inbox</span>
+          <span class="text-neutral-400">В работе</span>
+          <span class="text-neutral-400">Ожидание</span>
+          <span class="text-neutral-400">Проверка</span>
+          <span class="text-neutral-400">Готово</span>
+        </nav>
+
+        <!-- Форма добавления -->
+        <form class="mt-6 flex gap-2" onsubmit="return false">
+          <input type="text" placeholder="Новая задача..."
+            class="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-neutral-800 placeholder-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900" />
+          <button class="rounded-lg bg-neutral-900 px-4 py-2 font-medium text-white hover:bg-neutral-700">Добавить</button>
+        </form>
+
+        <!-- INBOX -->
+        <div class="mt-8 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">INBOX</span>
+          <span class="text-xs text-neutral-400">1</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div>
+              <p class="text-[15px] text-neutral-900">Запрос от нового клиента</p>
+              <p class="mt-0.5 text-xs text-neutral-400">от ООО «Вектор»</p>
+            </div>
+          </li>
+        </ul>
+
+        <!-- В РАБОТЕ -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">В РАБОТЕ</span>
+          <span class="text-xs text-neutral-400">1</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div>
+              <p class="text-[15px] text-neutral-900">Презентация для совета</p>
+              <p class="mt-0.5 text-xs text-neutral-400">от ООО «Ромашка» · сам</p>
+            </div>
+          </li>
+        </ul>
+
+        <!-- ОЖИДАНИЕ -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">ОЖИДАНИЕ</span>
+          <span class="text-xs text-neutral-400">3</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Макет лендинга</p>
+              <p class="mt-0.5 text-xs text-neutral-400">ждёт Аня · от ООО «Ромашка» · follow-up сегодня</p>
+            </div>
+            <span class="mt-0.5 shrink-0 rounded-md bg-amber-100 px-2 py-0.5 text-xs text-amber-700">4 дн</span>
+          </li>
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Тексты для рассылки</p>
+              <p class="mt-0.5 text-xs text-neutral-400">ждёт Игорь · от ИП Смирнов · follow-up просрочен</p>
+            </div>
+            <span class="mt-0.5 shrink-0 rounded-md bg-red-100 px-2 py-0.5 text-xs text-red-700">11 дн ⚠</span>
+          </li>
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Смета на монтаж</p>
+              <p class="mt-0.5 text-xs text-neutral-400">ждёт Пётр · от Завод «Сталь» · follow-up 12 марта</p>
+            </div>
+            <span class="mt-0.5 shrink-0 rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">2 дн</span>
+          </li>
+        </ul>
+
+        <!-- НА ПРОВЕРКЕ -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">НА ПРОВЕРКЕ</span>
+          <span class="text-xs text-neutral-400">1</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 h-4 w-4 shrink-0 rounded border border-neutral-300"></span>
+            <div class="min-w-0 flex-1">
+              <p class="text-[15px] text-neutral-900">Договор с подрядчиком</p>
+              <p class="mt-0.5 text-xs text-neutral-400">вернул Сергей · для заказчика X</p>
+            </div>
+            <span class="mt-0.5 shrink-0 rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-700">проверить</span>
+          </li>
+        </ul>
+
+        <!-- ГОТОВО -->
+        <div class="mt-6 flex items-center justify-between">
+          <span class="text-xs font-semibold tracking-wide text-neutral-400">ГОТОВО</span>
+          <span class="text-xs text-neutral-400">2</span>
+        </div>
+        <ul class="mt-2 divide-y divide-neutral-100">
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-neutral-900 text-[10px] text-white">✓</span>
+            <div>
+              <p class="text-[15px] text-neutral-300 line-through">Логотип обновлён</p>
+              <p class="mt-0.5 text-xs text-neutral-400">делала Аня · для ООО «Вектор»</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 py-3">
+            <span class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-neutral-900 text-[10px] text-white">✓</span>
+            <div>
+              <p class="text-[15px] text-neutral-300 line-through">Счёт выставлен</p>
+              <p class="mt-0.5 text-xs text-neutral-400">сам · для ИП Смирнов</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+</body>
+</html>

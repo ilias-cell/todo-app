@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  INBOX
+  IN_PROGRESS
+  WAITING
+  REVIEW
+  DONE
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  DONE
+}
+
+enum EventKind {
+  MEETING
+  DEADLINE
+  INFO
+}
+
+enum Recurrence {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum HabitFrequency {
+  DAILY
+  WEEKLY_COUNT
+  WEEKDAYS
+}
+
+model Person {
+  id        Int      @id @default(autoincrement())
+  name      String
+  isMe      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  asCustomer  Todo[]       @relation("Customer")
+  asAssignee  Todo[]       @relation("Assignee")
+  events      Event[]
+  agendaItems AgendaItem[]
+}
+
+model Context {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String
+  todos Todo[]
+}
+
+model Project {
+  id        Int           @id @default(autoincrement())
+  name      String
+  outcome   String?
+  status    ProjectStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @default(now()) @updatedAt
+
+  todos  Todo[]
+  events Event[]
+}
+
+model Todo {
+  id           Int       @id @default(autoincrement())
+  text         String
+  nextAction   String?
+  status       Status    @default(INBOX)
+  followUpDate DateTime?
+  waitingSince DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  customerId Int?
+  customer   Person? @relation("Customer", fields: [customerId], references: [id])
+  assigneeId Int?
+  assignee   Person? @relation("Assignee", fields: [assigneeId], references: [id])
+
+  projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  contexts Context[]
+}
+
+model Event {
+  id        Int       @id @default(autoincrement())
+  title     String
+  kind      EventKind @default(MEETING)
+  date      String
+  startTime String?
+  endTime   String?
+  note      String?
+  createdAt DateTime  @default(now())
+
+  personId  Int?
+  person    Person?  @relation(fields: [personId], references: [id], onDelete: SetNull)
+  projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  recurrence    Recurrence?
+  recurrenceEnd DateTime?   @db.Date
+}
+
+model AgendaItem {
+  id          Int       @id @default(autoincrement())
+  text        String
+  done        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  discussedAt DateTime?
+
+  personId Int
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+model Habit {
+  id          Int            @id @default(autoincrement())
+  name        String
+  color       String         @default("oklch(60% 0.14 240)")
+  frequency   HabitFrequency @default(DAILY)
+  weekdays    String?        // JSON: [1,2,3,4,5] — только для WEEKDAYS
+  targetCount Int            @default(1) // для WEEKLY_COUNT: сколько раз в неделю
+  startDate   String         // YYYY-MM-DD
+  pausedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  entries HabitEntry[]
+}
+
+model HabitEntry {
+  id        Int      @id @default(autoincrement())
+  habitId   Int
+  date      String   // YYYY-MM-DD
+  createdAt DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([date])
+}

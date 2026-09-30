@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Календарь</title>
+  <style>
+    :root {
+      --n-0:  oklch(98.5% 0.002 264);
+      --n-1:  oklch(97%   0.002 264);
+      --n-2:  oklch(93%   0.003 264);
+      --n-3:  oklch(88%   0.004 264);
+      --n-4:  oklch(82%   0.004 264);
+      --n-5:  oklch(68%   0.006 264);
+      --n-6:  oklch(52%   0.008 264);
+      --n-7:  oklch(38%   0.010 264);
+      --n-8:  oklch(24%   0.012 264);
+      --n-9:  oklch(15%   0.014 264);
+
+      --bg:          var(--n-0);
+      --surface:     var(--n-1);
+      --raised:      var(--n-2);
+      --border:      var(--n-3);
+      --border-soft: var(--n-4);
+      --text:        var(--n-9);
+      --text-sec:    var(--n-7);
+      --text-muted:  var(--n-6);
+      --text-ghost:  var(--n-5);
+      --accent:      var(--n-9);
+      --accent-fg:   var(--n-0);
+      --pill-bg:     var(--n-2);
+      --pill-text:   var(--n-7);
+
+      --info:      oklch(60% 0.14 240);
+      --info-bg:   oklch(96% 0.03 240);
+      --warn:      oklch(62% 0.15 68);
+      --warn-bg:   oklch(96% 0.04 80);
+      --purple:    oklch(58% 0.13 300);
+      --success:   oklch(58% 0.14 148);
+      --success-bg:oklch(96% 0.03 148);
+
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-pill:99px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .workspace {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Навигация ── */
+    .nav {
+      display: flex;
+      gap: 28px;
+      border-bottom: 1px solid var(--border-soft);
+      padding-top: 20px;
+    }
+
+    .nav-tab {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0 0 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 140ms ease;
+    }
+
+    .nav-tab:hover { color: var(--text-sec); }
+
+    .nav-tab.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* ── TodayBar ── */
+    .today-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .today-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .today-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-pill);
+      padding: 2px 10px 2px 8px;
+      font-size: 12.5px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .today-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--info);
+      flex-shrink: 0;
+    }
+
+    .today-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Контент ── */
+    .content { padding-top: 28px; }
+
+    /* ── Строка 1: навигация по периоду ── */
+    .period-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .period-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px; height: 30px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      color: var(--text-sec);
+      transition: border-color 140ms, color 140ms, background 140ms;
+    }
+
+    .period-arrow:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+      background: var(--raised);
+    }
+
+    .period-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -.01em;
+      min-width: 180px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Строка 2: режим + кнопки справа ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Переключатель режима */
+    .mode-switch {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .mode-btn {
+      background: none;
+      border: none;
+      padding: 7px 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 140ms, background 140ms;
+      min-height: 34px;
+    }
+
+    .mode-btn + .mode-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .mode-btn:hover { color: var(--text-sec); background: var(--raised); }
+
+    .mode-btn.active {
+      color: var(--text);
+      font-weight: 500;
+      background: var(--raised);
+    }
+
+    /* Кнопки справа: фильтр + добавить */
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Ghost-кнопка — базовый стиль для обеих */
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 7px 12px;
+      font-size: 13.5px;
+      font-family: inherit;
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: border-color 140ms, color 140ms, background 140ms;
+      min-height: 34px;
+    }
+
+    .ghost-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+      background: var(--raised);
+    }
+
+    /* Иконка-only кнопка фильтра */
+    .filter-btn {
+      width: 34px;
+      padding: 0;
+    }
+
+    /* Дропдаун фильтра */
+    .filter-wrapper {
+      position: relative;
+    }
+
+    .filter-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 8px;
+      min-width: 140px;
+      box-shadow: 0 4px 16px oklch(15% 0.01 264 / .10),
+                  0 0 0 1px oklch(15% 0.01 264 / .06);
+      z-index: 10;
+    }
+
+    .filter-wrapper:focus-within .filter-dropdown,
+    .filter-wrapper.open .filter-dropdown {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .filter-dropdown-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-ghost);
+      padding: 4px 8px 6px;
+    }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: var(--r-sm);
+      font-size: 13.5px;
+      color: var(--text-sec);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      text-align: left;
+      transition: background 120ms, color 120ms;
+    }
+
+    .filter-option:hover {
+      background: var(--raised);
+      color: var(--text);
+    }
+
+    .filter-option.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .filter-option-check {
+      width: 14px; height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── Секция дня ── */
+    .day-section { margin-bottom: 28px; }
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .day-title {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .03em;
+      color: var(--text-muted);
+    }
+
+    .day-today-badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--info);
+      background: var(--info-bg);
+      border-radius: var(--r-pill);
+      padding: 1px 8px;
+    }
+
+    /* ── Строка события ── */
+    .event-list { list-style: none; }
+
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .event-item:last-child { border-bottom: none; }
+
+    .event-time {
+      flex-shrink: 0;
+      width: 96px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      padding-top: 2px;
+      text-align: right;
+    }
+
+    .event-bar {
+      flex-shrink: 0;
+      width: 3px;
+      align-self: stretch;
+      min-height: 18px;
+      border-radius: 2px;
+      margin-top: 2px;
+    }
+
+    .event-bar.meeting  { background: var(--info); }
+    .event-bar.deadline { background: var(--warn); }
+    .event-bar.note     { background: var(--purple); }
+
+    .event-body { flex: 1; min-width: 0; }
+
+    .event-title {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .event-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 3px;
+    }
+
+    .event-project {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--pill-bg);
+      border-radius: var(--r-pill);
+      padding: 1px 8px 1px 6px;
+      font-size: 11.5px;
+      color: var(--pill-text);
+    }
+
+    .event-project-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--text-ghost);
+    }
+  </style>
+</head>
+<body>
+
+<div class="workspace">
+
+  <!-- Навигация -->
+  <nav class="nav" aria-label="Разделы приложения">
+    <button class="nav-tab">Утренний обзор</button>
+    <button class="nav-tab">Все задачи</button>
+    <button class="nav-tab">Обзор недели</button>
+    <button class="nav-tab active" aria-current="page">Календарь</button>
+  </nav>
+
+  <!-- TodayBar -->
+  <div class="today-bar" role="region" aria-label="События сегодня">
+    <span class="today-label">Сегодня</span>
+    <span class="today-event">
+      <span class="today-dot" aria-hidden="true"></span>
+      <span class="today-time">11:00</span>
+      Дэйли
+    </span>
+    <span class="today-event">
+      <span class="today-dot" aria-hidden="true"></span>
+      <span class="today-time">14:00</span>
+      УРОЦП
+    </span>
+  </div>
+
+  <main class="content">
+
+    <!-- Строка 1: период -->
+    <div class="period-nav" role="navigation" aria-label="Навигация по периоду">
+      <button class="period-arrow" aria-label="Предыдущая неделя">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="period-label">28 сен – 4 окт 2026</span>
+      <button class="period-arrow" aria-label="Следующая неделя">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Строка 2: режим слева, фильтр + добавить справа -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="mode-switch" role="group" aria-label="Режим просмотра">
+          <button class="mode-btn" aria-pressed="false">День</button>
+          <button class="mode-btn active" aria-pressed="true">Неделя</button>
+          <button class="mode-btn" aria-pressed="false">Месяц</button>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Фильтр проектов — иконка, дропдаун по клику -->
+        <div class="filter-wrapper" id="filterWrapper">
+          <button
+            class="ghost-btn filter-btn"
+            aria-label="Фильтр по проекту"
+            aria-haspopup="true"
+            aria-expanded="false"
+            id="filterBtn"
+            onclick="toggleFilter()"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="filter-dropdown" role="menu" aria-label="Проекты">
+            <span class="filter-dropdown-label">Проект</span>
+            <button class="filter-option active" role="menuitemradio" aria-checked="true">
+              <span class="filter-option-check">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M1 6l3.5 3.5L11 2" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Все
+            </button>
+            <button class="filter-option" role="menuitemradio" aria-checked="false">
+              <span class="filter-option-check"></span>
+              Работа
+            </button>
+            <button class="filter-option" role="menuitemradio" aria-checked="false">
+              <span class="filter-option-check"></span>
+              Дом
+            </button>
+          </div>
+        </div>
+
+        <!-- Добавить событие -->
+        <button class="ghost-btn" aria-label="Добавить событие">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <path d="M6.5 1V12M1 6.5H12" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round"/>
+          </svg>
+          Событие
+        </button>
+      </div>
+    </div>
+
+    <!-- Сегодня -->
+    <section class="day-section" aria-labelledby="day-today">
+      <div class="day-header">
+        <span class="day-today-badge">Сегодня</span>
+        <span class="day-title" id="day-today">пн, 28 сен</span>
+      </div>
+      <ul class="event-list" role="list">
+        <li class="event-item">
+          <span class="event-time">11:00–11:30</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Дэйли</div>
+          </div>
+        </li>
+        <li class="event-item">
+          <span class="event-time">14:00–15:00</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">УРОЦП</div>
+            <div class="event-meta">
+              <span class="event-project" aria-label="Проект: Работа">
+                <span class="event-project-dot" aria-hidden="true"></span>
+                Работа
+              </span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Завтра -->
+    <section class="day-section" aria-labelledby="day-tue">
+      <div class="day-header">
+        <span class="day-title" id="day-tue">вт, 29 сен</span>
+      </div>
+      <ul class="event-list" role="list">
+        <li class="event-item">
+          <span class="event-time">11:00–11:30</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Дэйли</div>
+          </div>
+        </li>
+        <li class="event-item">
+          <span class="event-time">18:30–20:00</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Миопрессура</div>
+            <div class="event-meta">
+              <span class="event-project" aria-label="Проект: Дом">
+                <span class="event-project-dot" style="background: var(--warn)" aria-hidden="true"></span>
+                Дом
+              </span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Среда -->
+    <section class="day-section" aria-labelledby="day-wed">
+      <div class="day-header">
+        <span class="day-title" id="day-wed">ср, 30 сен</span>
+      </div>
+      <ul class="event-list" role="list">
+        <li class="event-item">
+          <span class="event-time">11:00–11:30</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Дэйли</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Четверг -->
+    <section class="day-section" aria-labelledby="day-thu">
+      <div class="day-header">
+        <span class="day-title" id="day-thu">чт, 1 окт</span>
+      </div>
+      <ul class="event-list" role="list">
+        <li class="event-item">
+          <span class="event-time">11:00–11:30</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Дэйли</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Пятница -->
+    <section class="day-section" aria-labelledby="day-fri">
+      <div class="day-header">
+        <span class="day-title" id="day-fri">пт, 2 окт</span>
+      </div>
+      <ul class="event-list" role="list">
+        <li class="event-item">
+          <span class="event-time">11:00–11:30</span>
+          <span class="event-bar meeting" aria-hidden="true"></span>
+          <div class="event-body">
+            <div class="event-title">Дэйли</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function toggleFilter() {
+    const wrapper = document.getElementById('filterWrapper')
+    const btn     = document.getElementById('filterBtn')
+    const isOpen  = wrapper.classList.toggle('open')
+    btn.setAttribute('aria-expanded', isOpen)
+  }
+
+  // Закрыть при клике вне
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('filterWrapper')
+    if (!wrapper.contains(e.target)) {
+      wrapper.classList.remove('open')
+      document.getElementById('filterBtn').setAttribute('aria-expanded', 'false')
+    }
+  })
+
+  // Выбор проекта
+  document.querySelectorAll('.filter-option').forEach((opt) => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation()
+      document.querySelectorAll('.filter-option').forEach((o) => {
+        o.classList.remove('active')
+        o.setAttribute('aria-checked', 'false')
+        o.querySelector('.filter-option-check').innerHTML = ''
+      })
+      opt.classList.add('active')
+      opt.setAttribute('aria-checked', 'true')
+      opt.querySelector('.filter-option-check').innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1 6l3.5 3.5L11 2" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`
+    })
+  })
+</script>
+
+</body>
+</html>

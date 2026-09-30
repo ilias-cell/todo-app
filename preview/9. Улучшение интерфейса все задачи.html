@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Все задачи</title>
+  <style>
+    /* ─── Токены ─────────────────────────────────────────────────────────────
+       Нейтральная шкала на OKLCH — lightness движется равномерно,
+       hue не дрейфует. Один акцент (ink), четыре семантики.          */
+    :root {
+      /* Нейтрали */
+      --n-0:   oklch(98.5% 0.002 264);  /* фон страницы          */
+      --n-1:   oklch(97%   0.002 264);  /* поверхность           */
+      --n-2:   oklch(93%   0.003 264);  /* приподнятая поверхность */
+      --n-3:   oklch(88%   0.004 264);  /* бордер                */
+      --n-4:   oklch(82%   0.004 264);  /* бордер мягкий         */
+      --n-5:   oklch(68%   0.006 264);  /* текст-ghost           */
+      --n-6:   oklch(52%   0.008 264);  /* текст muted           */
+      --n-7:   oklch(38%   0.010 264);  /* текст secondary       */
+      --n-8:   oklch(24%   0.012 264);  /* текст primary-soft    */
+      --n-9:   oklch(15%   0.014 264);  /* off-black (ink)       */
+
+      /* Акцент — ink */
+      --accent:      var(--n-9);
+      --accent-fg:   var(--n-0);
+
+      /* Роли поверхностей */
+      --bg:          var(--n-0);
+      --surface:     var(--n-1);
+      --raised:      var(--n-2);
+      --border:      var(--n-3);
+      --border-soft: var(--n-4);
+
+      /* Роли текста */
+      --text:        var(--n-9);
+      --text-sec:    var(--n-7);
+      --text-muted:  var(--n-6);
+      --text-ghost:  var(--n-5);
+
+      /* Семантика */
+      --warn:        oklch(68% 0.14  68);
+      --warn-bg:     oklch(96% 0.04  80);
+      --danger:      oklch(55% 0.18  25);
+      --danger-bg:   oklch(97% 0.03  25);
+      --success:     oklch(58% 0.14 148);
+      --success-bg:  oklch(96% 0.03 148);
+      --info:        oklch(60% 0.14 240);
+      --info-bg:     oklch(96% 0.03 240);
+
+      /* Пилюли/бейджи */
+      --pill-bg:     var(--n-2);
+      --pill-text:   var(--n-7);
+
+      /* Сегодня-бар */
+      --today-bg:    var(--n-1);
+
+      /* Радиусы — три значения */
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  16px;
+      --r-pill:99px;
+
+      /* Тени — бордер + минимальный блюр */
+      --shadow-raised: 0 1px 3px oklch(15% 0.01 264 / .08),
+                       0 0 0 1px oklch(15% 0.01 264 / .06);
+      --shadow-float:  0 4px 16px oklch(15% 0.01 264 / .12),
+                       0 0 0 1px oklch(15% 0.01 264 / .08);
+
+      /* Ритм */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+    }
+
+    /* ─── Сброс ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI',
+                   sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Обёртка ─────────────────────────────────────────────────────────── */
+    .workspace {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) 80px;
+    }
+
+    /* ─── Навигация ───────────────────────────────────────────────────────── */
+    .nav {
+      display: flex;
+      gap: var(--space-6);
+      border-bottom: 1px solid var(--border-soft);
+      padding-top: var(--space-5);
+    }
+
+    .nav-tab {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0 0 var(--space-3);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 140ms ease;
+      /* hit target */
+      min-height: 44px;
+      display: inline-flex;
+      align-items: flex-end;
+    }
+
+    .nav-tab:hover       { color: var(--text-sec); }
+    .nav-tab:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: var(--r-sm);
+    }
+
+    .nav-tab.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Активная линия — 2px, точно поверх бордера nav */
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* ─── TodayBar ────────────────────────────────────────────────────────── */
+    .today-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: 8px var(--space-4);
+      background: var(--today-bg);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .today-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: var(--space-1);
+    }
+
+    /* Событие — пилюля с тонким бордером, без буллета-акцента */
+    .today-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-pill);
+      padding: 2px 10px 2px 8px;
+      font-size: 12.5px;
+      color: var(--text);
+      white-space: nowrap;
+      box-shadow: var(--shadow-raised);
+    }
+
+    .today-event-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--info);
+    }
+
+    .today-event-time {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    /* ─── Контент ─────────────────────────────────────────────────────────── */
+    .content { padding-top: var(--space-8); }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 650;
+      letter-spacing: -.022em;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: var(--space-5);
+    }
+
+    /* ─── Фильтры статуса ─────────────────────────────────────────────────── */
+    .status-filters {
+      display: flex;
+      gap: var(--space-5);
+      margin-bottom: var(--space-5);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 120ms ease;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .filter-btn:hover        { color: var(--text-sec); }
+    .filter-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: var(--r-sm);
+    }
+
+    .filter-btn.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ─── Поле добавления ─────────────────────────────────────────────────── */
+    .add-row {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-8);
+    }
+
+    .add-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+      min-height: 44px;
+    }
+
+    .add-input::placeholder { color: var(--text-ghost); }
+
+    .add-input:hover  { border-color: var(--n-4); }
+    .add-input:focus  {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px oklch(15% 0.014 264 / .08);
+    }
+
+    .add-btn {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border: none;
+      border-radius: var(--r-md);
+      padding: 10px var(--space-5);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 140ms ease, transform 80ms ease;
+      white-space: nowrap;
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .add-btn:hover   { opacity: .88; }
+    .add-btn:active  { opacity: .75; transform: scale(.98); }
+    .add-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+    .add-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    /* ─── Секция ──────────────────────────────────────────────────────────── */
+    .section { margin-bottom: var(--space-6); }
+
+    .section-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-ghost);
+      margin-bottom: var(--space-2);
+    }
+
+    /* ─── Список задач ────────────────────────────────────────────────────── */
+    .task-list { list-style: none; }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .task-item:last-child { border-bottom: none; }
+
+    /* ── Круглый ghost-checkbox ── */
+    .task-check {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      margin-top: 2px;
+      transition: border-color 140ms ease,
+                  background   140ms ease,
+                  box-shadow   140ms ease;
+      position: relative;
+    }
+
+    .task-check:hover {
+      border-color: var(--text-muted);
+    }
+
+    .task-check:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px oklch(15% 0.014 264 / .12);
+    }
+
+    /* Checked — filled circle с галочкой */
+    .task-check:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .task-check:checked::after {
+      content: '';
+      position: absolute;
+      top: 4.5px; left: 3px;
+      width: 9px; height: 5px;
+      border-left: 1.5px solid var(--accent-fg);
+      border-bottom: 1.5px solid var(--accent-fg);
+      transform: rotate(-45deg);
+    }
+
+    /* ── Тело задачи ── */
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .task-item.done .task-title {
+      color: var(--text-ghost);
+      text-decoration: line-through;
+      text-decoration-color: var(--border);
+    }
+
+    /* ── Мета-строка ── */
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 3px;
+    }
+
+    /* Исполнитель — чуть темнее ghost, без пилюли */
+    .meta-person {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    /* Контекст — тихая пилюля */
+    .meta-context {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--pill-bg);
+      border-radius: var(--r-pill);
+      padding: 1px 8px 1px 6px;
+      font-size: 11.5px;
+      color: var(--pill-text);
+    }
+
+    .meta-context-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--text-ghost);
+      flex-shrink: 0;
+    }
+
+    /* Follow-up */
+    .meta-followup {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meta-followup.soon { color: var(--warn); }
+
+    /* Ожидание */
+    .meta-waiting {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Бейдж дней ── */
+    .badge-days {
+      flex-shrink: 0;
+      background: var(--pill-bg);
+      border-radius: var(--r-sm);
+      padding: 2px 7px;
+      font-size: 11.5px;
+      font-variant-numeric: tabular-nums;
+      color: var(--pill-text);
+      margin-top: 2px;
+      align-self: flex-start;
+    }
+
+    /* ── Секция Готово — чекбоксы тише ── */
+    .section.done .task-check:checked {
+      background: var(--text-ghost);
+      border-color: var(--text-ghost);
+    }
+
+    /* ─── Разделитель между секциями ─────────────────────────────────────── */
+    .section + .section {
+      margin-top: var(--space-4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="workspace">
+
+  <!-- Навигация -->
+  <nav class="nav" aria-label="Разделы приложения">
+    <button class="nav-tab">Утренний обзор</button>
+    <button class="nav-tab active" aria-current="page">Все задачи</button>
+    <button class="nav-tab">Обзор недели</button>
+    <button class="nav-tab">Календарь</button>
+  </nav>
+
+  <!-- TodayBar -->
+  <div class="today-bar" role="region" aria-label="События сегодня">
+    <span class="today-label">Сегодня</span>
+    <span class="today-event">
+      <span class="today-event-dot" aria-hidden="true"></span>
+      <span class="today-event-time">11:00</span>
+      Дэйли
+    </span>
+    <span class="today-event">
+      <span class="today-event-dot" aria-hidden="true"></span>
+      <span class="today-event-time">14:00</span>
+      УРОЦП
+    </span>
+  </div>
+
+  <!-- Контент -->
+  <main class="content">
+    <h1 class="page-title">Все задачи</h1>
+
+    <!-- Фильтры статуса -->
+    <div class="status-filters" role="group" aria-label="Фильтр по статусу">
+      <button class="filter-btn active" aria-pressed="true">Все</button>
+      <button class="filter-btn" aria-pressed="false">Inbox</button>
+      <button class="filter-btn" aria-pressed="false">В работе</button>
+      <button class="filter-btn" aria-pressed="false">Ожидание</button>
+      <button class="filter-btn" aria-pressed="false">На проверке</button>
+      <button class="filter-btn" aria-pressed="false">Готово</button>
+    </div>
+
+    <!-- Поле добавления -->
+    <div class="add-row">
+      <input
+        class="add-input"
+        type="text"
+        placeholder="Новая задача…"
+        aria-label="Добавить новую задачу"
+      />
+      <button class="add-btn">Добавить</button>
+    </div>
+
+    <!-- В работе -->
+    <section class="section" aria-labelledby="lbl-inprogress">
+      <span class="section-label" id="lbl-inprogress">В работе</span>
+      <ul class="task-list" role="list">
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">Сделать автоматизацию при создании релиза</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">Помыть трекинговые ботинки</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+              <span class="meta-context" aria-label="Контекст: Дом">
+                <span class="meta-context-dot" aria-hidden="true"></span>
+                Дом
+              </span>
+            </div>
+          </div>
+        </li>
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">Посмотреть доску для ретро от Вики</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">Договориться с разрабами переводить в готово</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">Описать процесс работ администраторов и сопровождения</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- Ожидание -->
+    <section class="section" aria-labelledby="lbl-waiting">
+      <span class="section-label" id="lbl-waiting">Ожидание</span>
+      <ul class="task-list" role="list">
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">
+              Переделать все встречи команды, чтобы Виктория могла ими управлять
+            </div>
+          </div>
+          <span class="badge-days" aria-label="Ожидает 0 дней">0 дн</span>
+        </li>
+
+        <li class="task-item">
+          <input type="checkbox" class="task-check" aria-label="Отметить выполненной" />
+          <div class="task-body">
+            <div class="task-title">
+              Получить доступ для контент-менеджеров к стенду ДМ в Бэлл
+            </div>
+            <div class="task-meta">
+              <span class="meta-waiting">ждёт Я.Балясина</span>
+              <span class="meta-followup soon" aria-label="Follow-up 29 сентября 2026">
+                follow-up 29.09.2026
+              </span>
+            </div>
+          </div>
+          <span class="badge-days" aria-label="Ожидает 0 дней">0 дн</span>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- Готово -->
+    <section class="section done" aria-labelledby="lbl-done">
+      <span class="section-label" id="lbl-done">Готово</span>
+      <ul class="task-list" role="list">
+
+        <li class="task-item done">
+          <input type="checkbox" class="task-check" checked aria-label="Выполнено" />
+          <div class="task-body">
+            <div class="task-title">Передать доступ в Бэлл от 10:30</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="task-item done">
+          <input type="checkbox" class="task-check" checked aria-label="Выполнено" />
+          <div class="task-body">
+            <div class="task-title">Обновить онбординг для новых сотрудников</div>
+            <div class="task-meta">
+              <span class="meta-person">сам</span>
+              <span class="meta-context" aria-label="Контекст: Работа">
+                <span class="meta-context-dot" aria-hidden="true"></span>
+                Работа
+              </span>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
